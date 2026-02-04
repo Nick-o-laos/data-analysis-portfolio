@@ -1,0 +1,539 @@
+---
+title: "Course Assignmemt 1 2023-24"
+subtitle: "Advanced Data Analysis with R"
+author: "Nikolaos Papadopoulos, Postgraduate student in Statistics AUEB"
+date: "`r Sys.Date()`"
+fontsize: 10pt
+mainfont: Times New Roman
+linestretch: 1.5
+output: 
+  pdf_document:
+    toc: 2
+---
+
+```{r setup, include=FALSE, fig.align="center", out.width="75%"}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include = FALSE}
+# install.packages("kableExtra") - install.packages("corrplot")
+library(psych) ; library(readr) ; library(knitr) ; library(ggplot2) ; library(corrplot) ; library(kableExtra) ; library(car) ; library(lmtest) ; library(nortest)
+dedo = as.data.frame(read_csv("11_super_league_2013-14.csv"))
+dedo$HomeTeam = as.factor(dedo$HomeTeam)
+dedo$AwayTeam = as.factor(dedo$AwayTeam)
+
+dedo.result = dedo[, 1:10]
+
+dedo.odds = dedo[, 11:52]
+
+dedo.standard.odds = dedo.odds[, -c(25:42)]
+
+clean = na.omit(dedo)
+
+lista = NULL
+for(i in 0:(ncol(dedo.standard.odds)/3-1)){
+  k = c((3*i+1):(3*i+3))
+  lista[[i+1]] = dedo.standard.odds[,k]
+}
+
+names(lista) = sub("H$", "", names(dedo.standard.odds)[grepl("H$", names(dedo.standard.odds))])
+```
+
+\newpage    
+
+# 1. Introduction
+
+The _'Super League Greece'_ championship is the name of the football league that is being governed by the Hellenic Football Federation (HFF) founded on the 14th of November 1926. HFF is an active member in the FIFA and UEFA affiliation and almost annually sends the best Greek teams to the well known European Championships to compete with the big names of Europe in football.
+
+An interesting year in the _'Super League Greece'_ was the one that took place during the season of 2013-2014 and was the 78th championship in football league in which 18 teams were clashing for the first place. The champion team of that year turned to be _'Olympiakos'_ with a tremendous 17 difference of points from the second PAOK. 
+
+The first place was immediately qualified for the Champions League group stage, while the 2nd to 5th place had to clash again in the play-offs to claim the second space for the Champions League. The rest three teams after the play-offs would be qualified for the Europa League play-off rounds. At the same time, the last two teams (17th and 18th) would be relegated to the today's _'Super League 2 Greece'_ which was then called _'Football League'_. The team in the 16th place would be qualified to the relegation play-off, clashing with the second team of the _'Football League'_ which would try to climb to the 1st Division.
+
+The first part of this assignment will be focused on the part that has to do completely with the data that came out of the football matches. These data contain mainly the names of the teams,  the the goals scored until half time and full time, the outcomes of the half and full times that correspond to the matches. In a more visual way, the following table is an index of the 'results' data. In this one, the first 3 matches appear in the list.
+
+
+```{r, echo = FALSE, warning = FALSE}
+kable(head(dedo.result, 3))
+```
+
+The second part of the assignment will be exclusively on the odds that some of the most popular bookmakers make for the public to bet on the matches. Those odds provide useful information before the beginning of the matches and can be also analysed. Those, have the following form;
+
+```{r, echo = FALSE, warning = FALSE}
+kable(head(dedo.odds, 3)[,1:12])
+```
+
+[Standing Board of Super Leauge 2013-2014 *(If not found try to run the html file)*](Standings-Board.html)
+
+
+\newpage
+
+# 2. Descriptive analysis and exploratory data analysis
+
+## 2.1. Results' data descriptive analysis
+
+In this part of the analysis, some elementary characteristics of the four variables 'Final Time Home Goals' (from now on FTHG), 'Final Time Away Goals' (from now on FTAG), 'Half Time Home Goals' (from now on HTHG) and 'Half Time Away Goals' (from now on HTAG) will be printed in order to retrieve information relative to their distributions. 
+
+First of all, the descriptive statistics is the most efficient way to start with. In the following table, we can see various meters that provide information about these variables. 
+
+```{r, echo = FALSE, warning = FALSE}
+kable(round(describe(dedo.result[,c(5,6,8,9)])[,-c(1,2)], 3))
+```
+
+As one may see, almost all indexes are different. The ones that are most important to compare are the first two rows and the last two. The reason is because in this way we can compare how better the Home team does against the Away team. As we can see in both cases (Full and Half Time) the Home teams are on average superior to the Away teams. 
+
+```{r, echo = FALSE, fig.align="center", out.width="75%"}
+attach(dedo.result)
+
+# Boxplot of Goals 
+boxplot(FTHG, FTAG, HTHG, HTAG, main = "Boxplots of the four numerical variables", names = c("FTHG", "FTAG", "HTHG", "HTAG"))
+abline(h = mean(FTHG), col = "red", lty = 2, lwd = 2)
+abline(h = mean(FTAG), col = "orange", lty = 2, lwd = 2)
+abline(h = mean(HTHG), col = "blue", lty = 2, lwd = 2)
+abline(h = mean(HTAG), col = "black", lty = 2, lwd = 2)
+legend("topright", legend = c("Mean FTHG", "Mean FTAG", "Mean HTHG", "Mean HTAG"), col = c("red", "orange", "blue", "black"), lty = 3, bty = "l", lwd = 2)
+```
+
+In this graph, the four variables FTHM, FTAG, HTHG, HTAG are all fitted in a boxplot to make  the comparison easier. 
+
+Lastly, the most efficient way to visualize the distributions of the aforementioned variables is the following;
+
+```{r, echo = FALSE, fig.align="center", out.width="75%"}
+# FT H/A Goals Distributions 
+par(mfrow = c(2,2))
+barplot(table(FTHG), main = "Final Time Home Goals Distr. (FTHG)", col = "lightblue")
+barplot(table(FTAG), main = "Final Time Away Goals Distr. (FTAG)" , col = "pink")
+
+# HT H/A Goals Distributions 
+barplot(table(HTHG), main = "Half Time Home Goals Distr. (HTHG)", col = "lightblue")
+barplot(table(HTAG), main = "Half Time Away Goals Distr. (HTAG)", col = "pink")
+par(mfrow = c(1,1))
+```
+
+The above plot has on the left side, with the light blue colour, the distributions of the goals that the 'Home' teams scored. The difference between these two graphs is that the above corresponds to the goals achieved during the whole games, while the below corresponds to the goals achieved during the first half of the games.
+
+Respectively for the two graphs appearing on the right side, with the only difference that these goals refer to the goals achieved by the 'Away' teams. 
+
+Some interesting facts that one could retrieve from these barplots are the following; 
+
+1. The fact that the distribution of the FTHG with the mod being 2, is different from the one of the FTAG with the mod being 0! This somewhat proves the old saying that being in your own field, plus the support of the fans help the 'Home' teams fight for a better outcome.
+
+2. On the HTAG distribution number 4 is an actual bar, and corresponds to the match 'Ergotelis - Olympiakos' where Olympiakos crashed Ergotelis on half time with 0-4... The funny part is that the match ended 1-4. The odds from this match were of course in favor of Olympiakos with a mod equal to 1.33.
+
+
+```{r, echo = FALSE, fig.align="center", out.width="75%"}
+par(mfrow = c(1,2))
+# Frequency of FT results
+barplot(rev(table(FTR)), main = "Final Time Result Distribution", col = "chocolate", names = c("Home", "Draw", "Away"))
+
+# Frequency of HT results
+barplot(rev(table(HTR)), main = "Half Time Result Distribution", col = "lightgreen", names = c("Home", "Draw", "Away"))
+
+```
+
+## 2.2. Results' data descriptive analysis
+
+In this part of the descriptive analysis we will see the main characteristics of the odds which are numerical variables and can provide a lot of information for their continuous distributions.
+
+Primarily a table can be printed to indicate the summary statistics.
+
+```{r, echo = FALSE, warning = FALSE}
+kable(head(describe(dedo.standard.odds)[,-c(1,2)]))
+```
+
+In short, if one analytically observe the whole table, he will notice that all the values that correspond to equal characteristics (for example if he compares all the Home odds) he will not be able to see distinguishable difference. And due to the large amount of observations, it is almost sure that there is no difference. 
+
+Below we can see a plot that will prove in a way what has been said. This is a simple plot that has with a green line the mean of the odds per bookmaker for every spot (H/D/A). 
+
+```{r, echo = FALSE, warning = FALSE}
+result_list = split(describe(dedo.standard.odds)[,-1], rep(1:(nrow(describe(dedo.standard.odds)[,-1]) %/% 3), each = 3, length.out = nrow(describe(dedo.standard.odds)[,-1])))
+
+Home = Draw = Away = NULL
+for(i in 1:length(result_list)){
+  Home[i] = result_list[[i]][1,2]
+}
+
+for(i in 1:length(result_list)){
+  Draw[i] = result_list[[i]][2,2]
+}
+
+for(i in 1:length(result_list)){
+  Away[i] = result_list[[i]][3,2]
+}
+
+
+x.values = c(1, 2, 3, 4, 5, 6, 7, 8)
+book.names = c("BET365", "BW", "IW", "LB", "PS", "WH", "SJ", "VC")
+
+
+# Plot of the mean odds of each bookie for each spot
+plot(Home, col = "green", pch = 19, ylim = c(min(Home),max(Away)), ylab = "Home         Draw        Away", type = "o", xaxt = "n", main = "Mean odds of each bookmaker")
+axis(side = 1, at = x.values, labels = book.names)
+points(Draw, pch = 19, type = "o")
+points(Away, col = "red", pch = 19, type = "o")
+
+```
+
+The only observable difference is in the Away mean odds. This can be explained due to the fact that there have been matches in which the Home team is much better than the Away team and small changes in the Home odds can create big changes in the Away odds. (For example a possible odd group is 1.17-7.00-12.00 and another one is 1.22-6.16-9.25 so a change of 0.05 in home creates a 2.75 difference in Away.) The same happens sometimes if the opposite happens - the Away team is much better than the home team, but from historical data we know that sometimes the *'david and goliath'* phenomenon happens often. So the bookmakers know this and are more conservative with their suggesting odds.
+
+\newpage
+
+# 3. Pairwise comparisons
+
+## 3.1 Results' data correlation
+
+The pairwise comparisons have always been an excellent introduction step to dive into the correlation between the variables of the data. For the data that concern the matches' statistics, it is natural to be suspecting the existence of correlation between the number of goals (FTHG, FTAG, HTHG, HTAG) and of course the outcome (FTR, HTR).
+
+```{r, echo = FALSE, warning = FALSE}
+#install.packages("corrplot")
+
+FTR.num = NULL
+HTR.num = NULL
+for(i in 1:nrow(dedo)){
+  if(dedo$FTR[i] == "H"){
+    FTR.num[i] = 1 
+  }
+  if(dedo$FTR[i] == "D"){
+    FTR.num[i] = 2
+  }
+  if(dedo$FTR[i] == "A"){
+    FTR.num[i] = 3 
+  }
+  if(dedo$HTR[i] == "H"){
+    HTR.num[i] = 1 
+  }
+  if(dedo$HTR[i] == "D"){
+    HTR.num[i] = 2
+  }
+  if(dedo$HTR[i] == "A"){
+    HTR.num[i] = 3 
+  }
+}
+corrplot(cor(cbind(dedo[,c("FTHG", "FTAG", "HTHG", "HTAG")], FTR.num, HTR.num)), type = "lower", title = "\n\n Correlation Plot of Match Results", tl.col = "red", tl.srt = 45, bg = "grey", tl.cex = 0.7, method = "number", number.font = 4)
+```
+
+The first thing that can be said about this correlation plot is that the two categorical variables that became numeric so that they can fit into the analysis show huge correlation with all the variables. Interestingly the correlation between the two categorical variables have a correlation index of 0.56 which indicates that the Half Time Result is not strongly correlated to the Final Time Result. 
+
+Another interesting note is that some negative correlations appear too between FTR-FTHG and HTR-HTHG. This can be explained due to the way we have numbered the variables, because the higher number of goals by the Home team, the more likely it is the result to be in favor of Home, which is indicated with 1, which is the lowest value (H:1, D:2, A:3). The same applies with the half time and for the away goals which show high correlation too.
+
+-----
+
+## 3.2 Bookmakers' odds' correlation
+
+For the data that concern the matches' odds, we expect the correlation to be extremely strong - one could say even equal to 1 - because the odds represent probabilities of event in the match, and these probabilities mostly derive from past data and all these same data are analysed by the bookies individually. 
+
+```{r, echo = FALSE, warning = FALSE}
+# Creating correlation plots based on the outcome of the odds
+cor.home = cor(clean[, c("B365H", "BWH", "IWH", "LBH", "PSH", "SJH", "VCH")])
+cor.draw = cor(clean[, c("B365D", "BWD", "IWD", "LBD", "PSD", "SJD", "VCD")])
+cor.away = cor(clean[, c("B365A", "BWA", "IWA", "LBA", "PSA", "SJA", "VCA")])
+
+par(mfrow = c(1,3))
+corrplot(cor.home, method = "number", number.cex = 0.7, type = "lower")
+corrplot(cor.draw, method = "number", number.cex = 0.7, type = "lower")
+corrplot(cor.away, method = "number", number.cex = 0.7, type = "lower")
+par(mfrow = c(1,1))
+```
+
+As we can see, indeed almost all values in this 7x7 box are almost one. 
+
+Another very significant reason why the bookmakers should pay attention and have similar odds with other platforms is the fact that the players can take advantage of it and have a guaranteed win by strategically placing large amounts of money in a specific match and betting all 3 possible outcomes in different platforms. This is called **arbitrage** and more information can be found [*here*](https://fansided.com/betsided/education/arbitage)
+
+```{r, echo = FALSE, warning = FALSE}
+paste(names(rowSums(cor.home)[which(rowSums(cor.home) %in% max(rowSums(cor.home)))]), names(rowSums(cor.draw)[which(rowSums(cor.draw) %in% max(rowSums(cor.draw)))]), names(rowSums(cor.away)[which(rowSums(cor.away) %in% max(rowSums(cor.away)))]))
+```
+
+The above names are the names that indicate the highest number if we sum by rows all the corrplots and keep the greatest number. This was done because we want to keep the bookmaker who has the highest accordance with the others and since VC appeared twice, we are going to continue the analysis with this bookmaker.
+
+
+\newpage
+
+# 4. Predictive or Descriptive models
+
+The next station of the analysis is of course the predictive and descriptive models that can be produced by almost any kind of data and especially the ones that are at some considerable degree correlated. 
+
+As it was mentioned earlier, for the sake of this assignment, the 'VC' bookmaker will stay in the data as representative of the rest bookmakers. 
+The question that the data are going to answer in the following lines is whether or not it is possible that one can find a model which will accurately predict the odds of the bookmaker VC.
+
+## 4.1. VCA odds
+
+In order to do this, the initial data frame will be separated and only the meaningful variables will be kept, such as the FTHG, FTAG, HTHG, FTR, HTR. A linear model is in most cases the easiest way to continue with the analysis since we are dealing with numeric, continuous variables and not categories. To start with, the prediction of VCA will go first.
+
+```{r, include = FALSE, warning = FALSE}
+mod1 = lm(VCA ~ FTHG + FTAG + HTHG + HTAG + FTR + HTR, data = dedo)
+kable(round(summary(mod1)$coef, 5))
+```
+
+However, in this regression it is apparent that there are many errors. The most important one and the one that should be checked in advance is the fact that some variables contain the same information twice (for example the final time home goals contain the half time home goals of the same match) and this is a common case of multicollinearity. 
+
+The variables that are considered to be causing the multicollinearity to the model are the following: (Use of a strict criterion: vif < 4)
+
+```{r, echo = FALSE, warning = FALSE}
+names(vif(mod1)[,1][which(vif(mod1)[,1] >= 4)])
+```
+
+so running again the corrected model will give the following result:
+
+-----
+
+```{r, echo = FALSE, warning = FALSE}
+mod2 = lm(VCA ~ FTHG + FTAG, data = dedo)
+kable(round(summary(mod2)$coef, 5))
+```
+
+-----
+
+The only two variables that seem to answer well the above model are the ones that are connected to the final time goals for each team. This makes a lot of sense, since by the time we know the final result of the match we can assume odds relevant to the final time result.
+
+However, the R-squared adjusted value in our model is `r summary(mod2)$adj.r.squared` means that approximately 17% of the variability in the dependent variable is explained by the independent variables in the model, after adjusting for the number of predictors. In other words, the independent variables in the model collectively account for 17% of the variation observed in the dependent variable, and the remaining 83% of the variation is not explained at all.
+
+This can be rationally explained by the fact that even if we know the outcome of the game, we are not guaranteed to predict on point the Away odds of the match. An example to make this clear is the following... Imagine the national football team of France playing with the national football team of Gibraltar. The last match that these two teams had ended 14-0 in favour of France. Apparently, the odds for France would be very close to 1. However, imagine if the match had Gibraltar for winner. Then our model would never have predicted this, and it is very likely that it would give odds for Gibraltar even less than 2! 
+
+Also another reason that this model is quite faulty is that bookmakers don't use these variables to create the odds since they are unknown until that time. Instead, they use numerous football data from previous matches of both teams (wins/losses, goals scored, player strength, missing players, time of goals, corners, fouls, clean sheets, etc.), analyse them and come up with odds that also contain a little fee called **rake**. For more on rake, click [*here*](https://thekingofrome.com/what-is-rake-on-betting/)
+
+So... This is a very bad model and in most cases it shouldn't be an option for predictions, but for the shake of this assignment we are going to continue with it. The next thing we have to do is to check the main regression assumptions if they are satisfied.
+
+```{r, include = FALSE, warning = FALSE}
+### Normality
+# install.packages("nortest")
+shapiro.test(log(residuals(mod2))) 
+ks.test(mod2$residuals, "pnorm")
+lillie.test(residuals(mod2))
+
+### Autocorrelation
+durbinWatsonTest(mod2)
+
+### Heteroskedasticity
+# install.packages("lmtest")
+bptest(mod2) 
+```
+
+In order to check for the normality of the residuals, we are using three statistical tests, the *Shapiro test*, the *Kolmogorov-Smirnov test* and the *Lilliefors test*, and in all three the p-value is less than 0.05 so we reject the null hypothesis which assumes normality of the residuals. 
+
+Secondly in order to check for autocorrelation of the residuals, we are using the Durbin Watson test. The p-value is greater than 0.05, so there is no strong indication to reject the null hypothesis, so we can assume no autocorrelation in the residuals of the model.
+
+Lastly, to check for homoskedasticity, we run the Breusch Pagan test. The p-value is less than 0.05, so we reject the null hypothesis which assumes homoskedasticity and there is heteroskedasticity. 
+
+
+Now if we want to make predictions for the above model, we have to split the data into train and test data. 
+
+```{r, echo = FALSE, warning = FALSE, fig.align="center", out.width="75%"}
+# Splitting the dataset into training and testing sets (80-20)
+library(broom)
+set.seed(3612315)
+deigma = sample(1:nrow(dedo), 0.8 * nrow(dedo))
+train = dedo[deigma,]
+test = dedo[-deigma,]
+
+mod2 = lm(VCA ~ FTHG + FTAG, data = train)
+
+# Making predictions on the test set
+preds = predict(mod2, newdata = test)
+
+# Evaluating the model
+accuracy = mean((test$VCA - preds)^2)
+print(paste("Mean Squared Error:", round(accuracy, 3)))
+```
+
+The process with which this training was done, was by taking the 80% of the data randomly to train or more commonly run the model, to find the estimates, etc and by taking the rest 20% of the data to test if these data fitting well in our regression. 
+
+The mean squared error of this testing is `r round(accuracy, 3)` which is a measure of the average squared difference between predicted values and actual values in the regression. 
+
+With the following plot we can see that there are values who are very close to the line but also some others that could be considered as outliers. The reason is similar as previously, as in football data there can be such odds values in very uneven matches.
+
+```{r, echo = FALSE, warning = FALSE}
+# Plot the actual vs. predicted values
+plot(preds, test$VCA, main = "Actual vs. Predicted", xlab = "Predicted", ylab = "Actual")
+abline(0, 1, col = "red")
+```
+
+-----
+
+## 4.2. VCD odds
+
+Lastly, the same analysis will follow for the rest two odds, VCD and VCH. Starting with VCD, the model is the following:
+
+```{r, include = FALSE, warning = FALSE}
+mod3 = lm(VCD ~ FTHG + FTAG + HTHG + HTAG + FTR + HTR, data = dedo)
+kable(round(summary(mod3)$coef, 5))
+```
+
+where the variables that cause the multicollinearity are: 
+
+```{r, echo = FALSE, warning = FALSE}
+names(vif(mod3)[,1][which(vif(mod3)[,1] >= 4)])
+```
+
+and after the multicollinearity fix, it becomes this:
+
+```{r, echo = FALSE, warning = FALSE}
+mod4 = lm(VCD ~ FTHG + FTAG, data = dedo)
+
+kable(round(summary(mod4)$coef, 5))
+```
+
+As we can see, only the FTHG is considered to be a significant variable for the model. And if run it in a simple linear regression we will see that again the R-square adjusted is extremely low.
+
+```{r, echo = FALSE, warning = FALSE}
+mod5 = lm(VCD ~ FTHG, data = dedo)
+kable(summary(mod5)$coef)
+
+print(paste("R-square adjusted:", round(summary(mod5)$adj.r.squared,3)))
+```
+
+Now after having done the necessary hypothesis testing for the assumption of the model, now all three assumptions are rejected for significance level a = 0.08.
+
+```{r, include = FALSE, warning = FALSE}
+### Normality
+# install.packages("nortest")
+shapiro.test(log(residuals(mod5)))
+ks.test(mod5$residuals, "pnorm")
+lillie.test(residuals(mod5))
+
+### Autocorrelation
+durbinWatsonTest(mod5)
+
+### Heteroskedasticity
+# install.packages("lmtest")
+bptest(mod5) 
+```
+
+Next we can do the training of the model right as before.
+
+```{r, echo = FALSE, warning = FALSE, fig.align="center", out.width="75%"}
+# Splitting the dataset into training and testing sets (80-20)
+mod5 = lm(VCD ~ FTHG + FTAG, data = train)
+
+# Making predictions on the test set
+preds = predict(mod5, newdata = test)
+
+# Evaluating the model
+accuracy = mean((test$VCD - preds)^2)
+print(paste("Mean Squared Error:", round(accuracy, 3)))
+```
+
+And then we can get the plot:
+
+```{r, echo = FALSE, warning = FALSE}
+# Plot the actual vs. predicted values
+plot(preds, test$VCD, main = "Actual vs. Predicted", xlab = "Predicted", ylab = "Actual")
+abline(0, 1, col = "red")
+```
+
+-----
+
+## 4.3. VCH odds
+
+The last is the VCH, the model is the following:
+
+```{r, include = FALSE, warning = FALSE}
+mod6 = lm(VCH ~ FTHG + FTAG + HTHG + HTAG + FTR + HTR, data = dedo)
+kable(round(summary(mod3)$coef, 5))
+```
+
+Once more, the variables that cause the multicollinearity are the same:
+
+```{r, echo = FALSE, warning = FALSE}
+names(vif(mod6)[,1][which(vif(mod3)[,1] >= 4)])
+```
+
+and after the multicollinearity fix, it becomes this:
+
+```{r, echo = FALSE, warning = FALSE}
+mod7 = lm(VCH ~ FTHG + FTAG, data = dedo)
+kable(round(summary(mod7)$coef, 5))
+```
+
+Now both variables are considered significant.
+
+In this assumptions' analysis the shapiro test shows that the residuals are normally distributed after a log transformation on the residuals. The DW test shows no autocorrelation and the BP test shows heteroskedasticity. So, we are going to work with the transformed model.
+
+```{r, include = FALSE, warning = FALSE}
+### Normality
+# install.packages("nortest")
+shapiro.test(log(residuals(mod7)))
+ks.test(mod7$residuals, "pnorm")
+lillie.test(residuals(mod7))
+
+### Autocorrelation
+durbinWatsonTest(mod7)
+
+### Heteroskedasticity
+# install.packages("lmtest")
+bptest(mod7) 
+
+mod8 = lm(log(VCH) ~ FTHG + FTAG, data = dedo)
+kable(summary(mod8)$coef)
+```
+
+Now the training gives the mean square error to be:
+
+```{r, echo = FALSE, warning = FALSE, fig.align="center", out.width="75%"}
+# Splitting the dataset into training and testing sets (80-20)
+mod8 = lm(log(VCH) ~ FTHG + FTAG, data = train)
+
+# Making predictions on the test set
+preds = predict(mod8, newdata = test)
+
+# Evaluating the model
+accuracy = mean((test$VCH - preds)^2)
+print(paste("Mean Squared Error:", round(accuracy, 3)))
+```
+
+And for the last time the plot:
+
+```{r, echo = FALSE, warning = FALSE}
+# Plotting the actual vs. predicted values
+plot(preds, test$VCH, main = "Actual vs. Predicted", xlab = "Predicted", ylab = "Actual")
+abline(0, 1, col = "red")
+```
+
+\newpage
+
+# 5. Further analysis
+
+```{r, echo = FALSE, warning = FALSE}
+# Create a binary outcome variable for the response variable
+dedo$Result = ifelse(dedo$FTR == "H", 1, 0)  # 1 for Home Win, 0 for not Home Win
+
+# Select relevant features and outcome variable
+features = c("FTHG", "FTAG", "HTHG", "HTAG", names(dedo.standard.odds))
+
+
+set.seed(3612315)
+train = sample(seq_len(nrow(dedo)), 0.8 * nrow(dedo))
+test = dedo[-train, ]
+train = dedo[train, ]
+
+# Train a logistic regression model with regularization
+modelo = glm(Result ~ ., data = train[, c(features, "Result")], family = "binomial", 
+             control = glm.control(maxit = 50))  # Increase maxit or use control parameters
+kable(summary(modelo)$coef)
+
+# Make predictions on the test set
+predictions = predict(modelo, newdata = test[, features], type = "response")
+
+# Convert probabilities to predicted classes
+predicted_classes = ifelse(predictions > 0.5, 1, 0)
+
+# Evaluate the model
+accuracy = sum(predicted_classes == test$Result, na.rm = TRUE) / nrow(test)
+print(paste("Accuracy:", round(accuracy, 4)))
+
+
+```
+
+\newpage
+
+# 6. Conclusions and Discussion
+
+The analysis presented in this report focused on exploring and understanding the data related to the 2013-2014 Super League Greece football championship. The descriptive analysis of match results highlighted the dominance of home teams, both in terms of average goals scored and outcomes. The distribution of goals scored by home teams showed a distinct pattern compared to away teams, reinforcing the commonly observed home advantage in football. Additionally, the distribution of halftime and full-time results provided a snapshot of the competitiveness of the league.
+
+Exploring the odds offered by bookmakers revealed interesting patterns. Correlation analyses demonstrated strong positive correlations among odds provided by different bookmakers, indicating a consensus in the market. 
+
+Further, predictive models were attempted to estimate the bookmakers' odds based on match statistics. However, the models exhibited limitations, with low R-squared values and various assumptions not being met. This highlighted the complexity of predicting odds solely based on match outcomes and goal statistics.
+
+As a continuation, a logistic regression model was introduced to predict the probability of a home team winning a match. This model utilized both match statistics and bookmakers' odds as features. While the logistic regression model provided a framework for predicting match outcomes, its accuracy demonstrated the challenges of such predictions in the context of football.
+
+In conclusion, the analysis offered valuable insights into the Super League Greece 2013-2014 season. The dominance of home teams, patterns in goal distributions, and the consensus among bookmakers were evident. The predictive modeling attempts shed light on the difficulty of accurately predicting bookmakers' odds based solely on match statistics. Further research and consideration of additional variables, such as team performance indicators and player statistics, may enhance the predictive capabilities of such models. Additionally, understanding the limitations and uncertainties in football predictions is crucial for making informed decisions in sports betting.
+
+

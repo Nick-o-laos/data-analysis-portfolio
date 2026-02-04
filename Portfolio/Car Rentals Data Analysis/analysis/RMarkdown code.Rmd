@@ -1,0 +1,439 @@
+---
+title: "Course Assignmemt 2 2023-24"
+subtitle: "Advanced Data Analysis with R"
+author: "Nikolaos Papadopoulos, Postgraduate student in Statistics, AUEB"
+date: "`r Sys.Date()`"
+fontsize: 12pt
+mainfont: Times New Roman
+linestretch: 1.2
+output: 
+  pdf_document:
+    toc: 2
+---
+
+```{r setup, include=FALSE, eval = T}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include = FALSE}
+# LIBRARIES and data importation/correction
+library(psych) ; library(readr) ; library(dplyr)
+
+# Importing data
+setwd("C:/Users/nicko/Documents")
+sixt_17 = read_delim("C:/Users/nicko/Documents/sixt_17.csv", 
+    delim = ";", escape_double = FALSE, col_types = cols(Driver.ID = col_number(), 
+        Days = col_number(), Driver.Age = col_number(), 
+        Pre.paid.Amount = col_number(), First.Licence.Year = col_number(), 
+        C.O.Mileage = col_number(), OnDesk.Insurance.Net.Revenue = col_number(), 
+        OnDesk.Non.Insurance.Net.Revenue = col_number()), 
+    trim_ws = TRUE)
+dedo = as.data.frame(sixt_17)
+
+# Fix double to numeric
+double_cols = c(sapply(dedo, is.double))
+dedo[double_cols] = lapply(dedo[double_cols], function(x) as.numeric(as.character(x)))
+
+# Making NULL values 0 in the last two columns
+dedo$ODI = dedo$OnDesk.Insurance.Net.Revenue
+dedo$ODNI = dedo$OnDesk.Non.Insurance.Net.Revenue
+dedo = dedo[,-c(50,51)]
+dedo$ODI[which(dedo[,"ODI"] %in% NA)] = 0
+dedo$ODNI[which(dedo[,"ODNI"] %in% NA)] = 0
+
+# Creating the sum of the revenue sources
+dedo$ODNR = rowSums(dedo[,c(ncol(dedo)-1,ncol(dedo))])
+```
+
+\newpage
+
+# 1. Introduction
+
+## 1.1. Abstract
+
+The following report is the outcome of a statistical data analysis, performed for the students' evaluation of the course "Advanced Data Analysis with R" in the department of Statistics of the Athens University of Economics and Business, where a total of 5000 clients' data were given by "Motodynamiki". The main objective is to describe the characteristics of the clients that have purchased on-desk increments, in order for the company to create a more targeted campaign.
+
+## 1.2. Data Presentation and Correction
+
+### 1.2.1. Columns' Manipulation
+
+The columns "**OnDesk.Insurance.Net.Revenue**" and "**OnDesk.Non.Insurance.Net.Revenue**" are renamed as "ODI" and "ODNI" in short. Also, a new variable called "**OnDesk.Net.Revenue**" is added as the sum of the "ODI" and "ODNI" variables and will be referred to as "ODNR". Since we contain the ODNR, we can also remove the rest two in order to avoid multicollinearity in the next steps of the analysis.
+
+Another important element that should be added is the amount of Increments that each client bought. We are not truly interested in this phase on what products the customers bought, rather on how many money they payed "On Desk" and so we can simplify the data by adding a column.
+
+Some unimportant for the analysis variables are removed, which are the "**Res.no**", "**Agr.no**", "**Driver.ID**", "**Check.out.Station**" variables and correspond to the identification of the drivers. For the first part of the analysis, the variables "**Check.out.Date**", "**Check.out.Time**", "**Booking.Date**" and "**Booking.Time**" will be initially removed as well for the first part of the analysis and later on, their importance will be judged to determine if it is reasonable for them to exist in the analysis.
+
+### 1.2.1. Rows' Manipulation
+
+The reason that segment exists in this assignment is because there are some inserts that are probably untrustworthy, for example, in the age variable, there are observations where the age is 122, which doesn't seem normal. Fun fact, all of them are in Greece. So, in the age variable, we will focus only on those whose age is less than 90.
+
+```{r, include = FALSE}
+# Keeping only Ages below 90 and removing ID columns and dates
+rows.to.remove = NULL
+for(i in 1:nrow(dedo)){
+  if(is.na(dedo[,"Driver.Age"][i])){
+    
+  } else{
+    if(dedo[,"Driver.Age"][i] > 90){
+      rows.to.remove = c(rows.to.remove, i)
+    }
+  }
+}
+sixt_17[,37]
+dedo = dedo[-rows.to.remove,]
+dedo = dedo[,-c(1:4, 11:14, 37)]
+
+# Counting how many people bought each Incremental product
+Incrementals = NULL
+Incremental.name = colnames(dedo[7:27])
+for(i in 1:length(Incremental.name)){
+  Incrementals[i] = table(dedo[,Incremental.name[i]])[1]
+}
+Incrementals = 4592 - Incrementals
+Incrementals
+
+# Counting how many Incremental products each person bought
+Total.Incrementals = NULL
+for(i in 1:nrow(dedo)){
+  x = dedo[,7:27][i,]
+  Total.Incrementals[i] = sum(as.numeric(x)-1)
+}
+dedo$TI = Total.Incrementals
+dedo = dedo[,-(which(colnames(dedo) %in% c("ODI", "ODNI")))]
+
+for (i in 1:ncol(dedo)){
+  if(any(is.null(dedo[,i]))){
+    for(j in 1:length(dedo[,i])){
+      if(is.null(dedo[j,i])){
+        dedo[j,i] = NA
+      }
+    }
+  } else if(is.na(sum(dedo[,i] == "NULL"))){
+  } else if(sum(dedo[,i] == "NULL") > 0){
+        for(j in 1:length(dedo[,i])){
+      if(dedo[j,i] == "NULL"){
+        dedo[j,i] = NA
+      }
+    }
+  }
+}
+
+xx = c(2,3,6,7:27,29,30,34,35,37:40)
+for(i in 1:length(xx)){
+  dedo[,xx[i]] = as.factor(dedo[,xx[i]])
+}
+qual = c("Agent.group", "Driver.Country_Disp", "First.Licence.Year", "Group", "Charged.group", "Sales.Channel.2", "Segment", "Manufacturer", "Color", "Rate.title", "Status")
+ql.dedo = dedo[,which(colnames(dedo) %in% qual)]
+quan = c("Days", "Driver.Age", "Pre.paid.Amount", "C.O.Mileage", "Internet.Insurance.Net.Revenue", "Internet.Non.Insurance.Net.Revenue", "Rental_Cost_Res", "Past.Rentals.Entry", "TI", "ODNR")
+qn.dedo = dedo[,which(colnames(dedo) %in% quan)]
+attach(dedo)
+```
+
+## 1.3. Dealing with NAs
+
+In order to perform a good analysis it is imperative to have the biggest possible data set, and avoid throwing out whole rows due to only 1 NA when the rest columns include important information. One of the continuous variables that contain lots of NAs is the "Driver.Age" variable. Many methods can be applied to "guess" the missing values, but firstly, let's see the correlation plot of the numerical variables and focus on the information obtained by the age variable. Eventually, it seems that the age variable is not correlated to any of the other numerical variables that are selected, so instead of performing conditional sampling, it is reasonable to just create random values and plug them instead of the NAs.
+
+```{r, include=FALSE}
+# Bootstrap to find the age distribution (B should be at least 10000 but it takes ages)
+B = 50
+boot.age.sam = NULL
+for(i in 1:B){
+  boot.age.sam[[i]] = sample(na.omit(dedo$Driver.Age), sum(na.omit(dedo$Driver.Age)), replace = TRUE)
+}
+boot.age.probs = boot.age.sam %>% unlist() %>% table()/(B*sum(na.omit(dedo$Driver.Age)))
+age.guesses = sample(20:83, sum(is.na(dedo$Driver.Age)), prob = boot.age.probs, replace = TRUE)
+
+par(mfrow = c(1,2))
+hist(dedo$Driver.Age, breaks = 30) ; hist(unlist(boot.age.sam), breaks = 30)
+
+# Replace NAs with the above values 
+for(i in 1:nrow(dedo)){
+  if(is.na(dedo$Driver.Age[i])){
+    dedo$Driver.Age[i] = age.guesses[1]
+    age.guesses = age.guesses[-1]
+  }
+}
+
+pop = na.omit(dedo)
+```
+
+# 2. Descriptive Data Analysis
+
+## 2.1. ODNR variable
+
+In contents of the descriptive part of the analysis, some important summary statistics are included both for the explanatory variable (ODNR) and the rest variables depending on their nature, as well as the distributions that they follow since we can obtain important information for the rest of the analysis.
+
+Primarily, the interest circles around the ODNR variable and more specifically on the non zero values, where the descriptive statistics are the following;
+
+```{r, include = FALSE}
+### DESCRIPTIVE STATISTICS ###
+
+# Create summary statistics for non zero values in ODNR
+ODNRnon0 = ODNR[dedo$ODNR != 0] # Removing 0
+describe(ODNRnon0)[,c(-1,-2)]
+par(mfrow=c(1,2))
+hist(ODNR, breaks = 100, main = "ODNR distribution") ; hist(ODNRnon0, breaks = 100, main = "Non 0 ODNR distribution")
+```
+
+These plots represent the ODNR and non-zero ODNR distribution respectively. The left plot indicates a huge peak on 0 and a right-skewed tail then. On the right plot that the 0 values are absent, one may observe that there is still a huge peak closer to zero than any other value and again, a right-skewed tail. However, the data in the right plot seem to be spread with much better properties than the left side plot.
+
+Another interesting presentation of the ODNR variable is if the variables is split in 3 spaces and plot the histograms for each interval. One nice representation is if we split the data as follows;
+
+```{r, include=FALSE}
+# Spent over and less that 100
+par(mfrow = c(1,3))
+hist(ODNRnon0[ODNRnon0<=100], main = "Spent until 100", xlab = "Range 0-100", breaks = 20)
+hist(ODNRnon0[ODNRnon0>100 & ODNRnon0<=500], main = "Spent 100 upto 500", xlab = "Range 100-500", breaks = 20)
+hist(ODNRnon0[ODNRnon0>500], main = "Spent over 500", xlab = "Range 500-3705", breaks = 20)
+```
+
+Now, we get a better image on how many observations exist in each interval (roughly) and how they are distributed inside of it. As expected, the higher the interval, the less observations and a more right-skewed tail.
+
+## 2.2. Rest variables
+
+Of course the descriptive statistics of the data set are not surrounded exclusively by the explanatory variable. Below a quick representation of the rest statistics is cited;
+
+```{r, include = FALSE}
+round(t(describe(dedo[quan])[,-c(1,2)]),2)
+```
+
+The above table contains plenty useful information about the nature of each variable that could be mentioned. Later on, maybe they will be handy in the analysis as well.
+
+```{r, include = FALSE}
+
+# Create a function to generate a custom color palette
+custom_palette = function(n, alpha = 2) {
+  colorRampPalette(c("red", "blue"))(n)
+}
+
+# Generate the custom color palette with 8 shades
+paleta = custom_palette(9)
+barplot(table(TI), col = paleta)
+
+# Did the customer buy Increments?
+Inc = dedo[dedo$TI != "0", ]
+no.Inc = dedo[dedo$TI == "0", ]
+
+mean(Inc$Pre.paid.Amount) ; mean(no.Inc$Pre.paid.Amount)
+table(Inc$Color) ; table(no.Inc$Color)
+table(Inc$Manufacturer) ; table(no.Inc$Manufacturer)
+table(Inc$Driver.Country_Disp) ; table(no.Inc$Driver.Country_Disp)
+
+
+par(mfrow = c(3,4))
+rabdo = NULL
+for(i in 1:length(qual)){
+  barplot(table(dedo[,qual[i]]))
+}
+```
+
+
+# 3. Pairwise Comparisons and correlations
+
+### 3.1. Qualitative variables
+
+In this section, in order to find possible correlation between the qualitative variables and ODNR, many methods can be applies from factor analysis, but the briefest method shall be the ANOVA for modelling comparisons between the Null models and the ones that contain each time one of the qualitative variables.
+
+*Note: As before, the Incremental variables are not going to be counted in this analysis.*
+
+The p-values of the model that each one of them creates when we perform the regression with ODNR and compare to the Null model, are all less than 0.05, so we assume that there is a relation between these variables with the ODNR individually.
+
+```{r, include = FALSE}
+p.anv = NULL
+for(i in 1:(ncol(ql.dedo)-1)){
+  anova.res = aov(ODNR ~ ql.dedo[,i], data  = ql.dedo)
+  p.anv[i] = summary(anova.res)[[1]]$`Pr(>F)`[1]
+}
+names(p.anv) = colnames(ql.dedo)[-ncol(ql.dedo)]
+round(p.anv, 3)[-11]
+```
+
+### 3.2. Quantitative variables
+
+### 3.2.1. Correlation plot
+
+For this part, the analysis is going to be split in 2 parts, where the one will concern the numerical variables, and then the categorical variables, always comparing to our explanatory variable, ODNR.
+
+To start with, a correlation plot between all numeric variables will take place. We are interested in all the numerical variables' correlations because we know what dependencies exist in our data set, so that we avoid possible problems with the assumptions of our models.
+
+```{r, include = FALSE}
+corrplot::corrplot(round(cor(na.omit(qn.dedo)),2), type = "lower", order = "original", tl.cex = 0.5, method = "number")
+```
+
+The focus is on the row of the correlation between the ODNR and the rest variables, and as one may see, there is a very low correlation, almost insignificant. Usually values less than 0.3 are considered as no correlation, between 0.3 and 0.3 as existent correlation, and from 0.6 to 1 as strong correlation. Same applies for negative values for negative correlations.
+
+### 3.2.2. Simple Linear Regressions
+
+The purpose of this paragraph is to verify the above results. Every quantitative variable is going to be set into a regression model with the ODNR.
+
+```{r, include = FALSE}
+p.var = NULL
+for(i in 1:10){
+  mod3.2.2 = lm(ODNR ~ qn.dedo[,i], data = qn.dedo)
+  p.var[i] = coef(summary(mod3.2.2))[2,4]
+}
+p.var = round(p.var, 3)
+names(p.var) = colnames(qn.dedo)
+p.var[-9]
+
+```
+
+The variables that are significant from this analysis, come to be the "Driver Age", "Pre.paid.Amount", "C.O.Mileage", "Internet.Non.Insurance.Net.Revenue", "Rental_Cost_Res" and "TI". This is a sign for the next part of the analysis.
+
+
+# 4. Regression Analysis
+
+The last part of the analysis will be the regression models that will show which are the main variables that affect the explanatory ODNR.
+
+## 4.1. Multiple Regression Model
+
+Firstly, we are interested to see the properties of the saturated model of the variables that are kept in the analysis.
+
+```{r, include = FALSE}
+Inc = 1:30
+ODNR.dedo = dedo[dedo$ODNR != 0, ]
+
+ODNR.saturated = lm(ODNR ~ ., data = ODNR.dedo[,-Inc])
+summary(ODNR.saturated)
+olsrr::ols_step_best_subset(ODNR.saturated)
+
+pop$Days = as.numeric(pop$Days)
+
+```
+
+
+```{r, include = FALSE}
+# Final data to regress
+pop = na.omit(cbind(ql.dedo, qn.dedo))
+pop = pop[pop$ODNR >0,]
+
+# Building model
+saturated = lm(log(ODNR) ~., data = pop)
+#saturated$coefficients = na.omit(saturated$coefficients)
+summary(saturated)
+
+
+#car:: vif(saturated) # Multicollinearity
+shapiro.test(saturated$residuals) # Normality of residuals
+lmtest:: bptest(saturated) # Heteroskedasticity
+olsrr::ols_step_both_aic(saturated) # Best model selection
+```
+
+
+The best model primarily based on AIC and on R-square adjusted seems to be the saturated model of the variables we have kept which is the following:
+
+\begin{equation}
+   log(ODNR)  = \beta_0 + \beta_1 RentalCostRes + \beta_2 TI + \beta_3 Days + \beta_4 Group +
+\end{equation}
+
+
+\begin{equation}
+   \beta_5 Rate.title + \beta_6 C.O.Mileage \beta_7 Internet.Insurance.Net.Revenue + \beta_8 Sales.Channel.2 + \epsilon
+\end{equation}
+
+However, due to the fact that the -almost zero- differences of AIC in the last 4 models, we are going to keep a simpler model to continue the analysis.
+
+The final model is the following
+
+\begin{equation}
+   log(ODNR)  = \beta_0 + \beta_1 RentalCostRes + \beta_2 TI +
+\end{equation}
+
+\begin{equation}
+    \beta_3 Days + \beta_4 Group + \beta_5 Rate.title + \epsilon
+\end{equation}
+
+where TI is the total increments bought.
+
+```{r, include=FALSE}
+final = lm(log(ODNR)~ Rental_Cost_Res + TI + Days + Group + Rate.title, data = pop)
+summary(final)
+
+shapiro.test(final$residuals)
+car:: vif(final)
+lmtest:: bptest(final)
+```
+
+
+```{r, include = FALSE}
+### LASSO ###
+lambda.vals = seq(0.01,100, 0.01)
+lasso.fit = glmnet:: glmnet(x = pop[,-20], y = pop[, 20], family = "gaussian", alpha = 1, lambda = lambda.vals)
+summary(lasso.fit)
+
+# Plotting
+plot(lasso.fit, xvar = "lambda", label = T) # Lambdas in relation to the coefficients
+plot(lasso.fit, xvar = "dev", label = T) # GoF
+```
+
+
+
+```{r, include=FALSE}
+##### COULDN'T PERFORM IT #####
+
+
+
+# Number of folds
+n = 10
+# Shuffle the indices of the dataset
+indices = sample(nrow(pop))
+# Split the data into folds
+fold_size = floor(nrow(pop) / n)
+folds = split(indices, rep(1:n, each = fold_size))
+# Initialize vector to store validation errors
+validation_errors = numeric(n)
+# Perform 10-fold cross-validation
+fun = function(n){
+  for (i in 1:n) {
+     validation_set = pop[folds[[i]], ]
+  # Extract training set
+  training_set = pop[unlist(folds[-i]),]
+  
+  # Find factor columns with less than 2 levels
+  factor_cols = sapply(training_set, is.factor)
+  cols_less_than_2_levels = sapply(training_set[factor_cols], function(x) nlevels(x) < 2)
+  # Remove columns with less than 2 levels
+  training_set = training_set[, !cols_less_than_2_levels]
+  
+  # Find factor columns with less than 2 levels
+  factor_cols = sapply(validation_set, is.factor)
+  cols_less_than_2_levels = sapply(validation_set[factor_cols], function(x) nlevels(x) < 2)
+  # Remove columns with less than 2 levels
+  validation_set = validation_set[, !cols_less_than_2_levels]
+  
+  # Fit your model on the training set (you would replace this with your own modeling code)
+  model = lm(ODNR ~ ., data = training_set)
+  
+  x = table(validation_set$Driver.Country_Disp) %in% table(training_set$Driver.Country_Disp)
+  validation_set = validation_set[table(validation_set$Driver.Country_Disp)[x], ]
+  training_set = training_set[table(training_set$Driver.Country_Disp)[x], ]
+
+  x = table(validation_set$Group) %in% table(training_set$Group)
+  validation_set = validation_set[table(validation_set$Group)[x], ]
+  training_set = training_set[table(training_set$Group)[x], ]
+  
+  x = table(validation_set$Charged.group) %in% table(training_set$Charged.group)
+  validation_set = validation_set[table(validation_set$Charged.group)[x], ]
+  training_set = training_set[table(training_set$Charged.group)[x], ]
+  
+  # Make predictions on the validation set
+  predictions = predict(model, newdata = validation_set)
+  
+  # Calculate validation error (you would replace this with your own error metric)
+  validation_errors[i] = mean((validation_set$Y - predictions)^2)
+  }
+  return(validation_errors)
+}
+```
+
+# 5. Interpretation
+
+The assumptions of the model are not satisfied, so the intercepts of the variables can be misleading.
+
+However, the interpretation for the quantitative data is the following:
+
+Suppose we want to see how the variable "TI" affects the model. We consider all the other variables equal to 0, and the categorical ones to be at the base category which is set automatically. The effect of an additional TI, will be equal to the intercept of TI. 
+
+Now, the interpretation for the qualitative data is different:
+
+Suppose we want to see how the variable "Group" affects the model. We consider all the other variables equal to 0, and the categorical ones to be at the base category which is set automatically except the one that corresponds to the group, which will be the category that we test. Each category has a different number, so it affects differently the model.

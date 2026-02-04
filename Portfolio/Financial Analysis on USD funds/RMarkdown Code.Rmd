@@ -1,0 +1,649 @@
+---
+title: "Assignment-june-2024"
+subtitle: "M.Sc. in Statistics - Financial Analytics"
+author: "Nikolaos Papadopoulos"
+date: "`r Sys.Date()`"
+fontsize: 10pt
+linestretch: 1.5
+output: pdf_document
+toc: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\newpage
+
+# Abstract
+
+The following paper contains the analysis of the returns of USA mutual funds for the period 07/1963 – 07/2019, also combined with selected explanatory factors, which are: {S&P500 excess returns, SMB, HML, RMW, CMA, MOM, BAB, CAR} again for the period 07/1963 - 07/2019. The analysis was performed in two parts, the Performance Evaluation and the Portfolio Construction and in both cases, the datasets were separated into the in-sample period (07/1963 - 07/2015) and the out-of-sample period (08/2015 - 07/2019).
+
+--- 
+
+# Introduction
+
+The following analysis is part of the course evaluation of Financial Analytics of the Master's program in Statistics of the Athens University of Economics and Business (A.U.E.B.). The given datasets are provided through an .xlsx file and the analysis is performed through the programming language R. This implies that the data must be entered in the R environment and be manipulated in such a way that will represent the time series. After that, the first step will be to start analyzing the data by evaluating the performance of the funds. This can be done by using several econometric methods, and the ones who will be initially applied in this paper are the Sharpe ratio, Treynor ratio, Sortino ratio, Jensen's alpha. However, we can extend the analysis and continue by adding other methods to estimate the Jensen's alpha apart from the single factor model (S&P500), such as the multiple regression models by applying model selection methods or by applying GARCH type models.
+
+```{r Loading libraries and reading data, include = FALSE, echo = FALSE, message = FALSE}
+
+rm(list=ls(all=TRUE))
+library(readxl) ; library(dplyr) ; library(tidyverse) ; library(timeSeries) ; library(tseries) ; library(olsrr) ; library(imputeTS) ; library(quadprog)
+
+# ---------------------------------------------------------------------------- #
+
+# Funds data
+funds = as.data.frame(read_excel("C:/Users/nicko/Documents/US_FUND_DATA (2).xlsx", sheet = 1))
+funds = funds[1:(nrow(funds)-6), c(1, 101:190)]
+colnames(funds)[1] = "Date"
+
+# Factors data
+factors = as.data.frame(read_excel("C:/Users/nicko/Documents/US_FUND_DATA (2).xlsx", sheet = 2))
+colnames(factors)[1] = "Date"
+
+# Convert date columns to Date type
+for(i in 1:nrow(factors)){
+  factors$Date[i] = as.character(paste0(substr(factors$Date[i], 1, 4), "-", substr(factors$Date[i], 5, 6), "-01"))
+}
+
+# Time
+Time = seq(as.Date(funds$Date[1]), as.Date(funds$Date[length(funds$Date)]), by="1 month")
+Time = timeLastDayInMonth(Time)
+TS_funds = timeSeries(funds, Time) ; TS_factors = timeSeries(factors, Time)
+TS_funds = TS_funds[,-1] ; TS_factors = TS_factors[,-1]
+
+# ---------------------------------------------------------------------------- #
+
+```
+
+```{r Splitting data based on in-sample period and out-of-sample period, include = FALSE, echo = FALSE, message = FALSE}
+# ---------------------------------------------------------------------------- #
+
+# Filter the data for the initial estimation period (7/1963 – 7/2015) - non time series data frame
+funds_in = funds[funds$Date >= as.Date("1963-07-01") & funds$Date <= as.Date("2015-07-31"), ]
+factors_in = factors[factors$Date >= as.Date("1963-07-01") & factors$Date <= as.Date("2015-07-31"),]
+
+# Filter the data for the out-of-sample period (8/2015 – 7/2019) - non time series data frame
+funds_out = funds[funds$Date >= as.Date("2015-08-01") & funds$Date <= as.Date("2019-07-31"),]
+factors_out = factors[factors$Date >= as.Date("2015-08-01") & factors$Date <= as.Date("2019-07-31"),]
+
+
+
+# Filter the data for the initial estimation period (7/1963 – 7/2015) - time series data frame
+TS_funds_in = TS_funds[funds$Date >= as.Date("1963-07-01") & funds$Date <= as.Date("2015-07-31"), ]
+TS_factors_in = TS_factors[factors$Date >= as.Date("1963-07-01") & factors$Date <= as.Date("2015-07-31"),]
+
+# Filter the data for the out-of-sample period (8/2015 – 7/2019) - time series data frame
+TS_funds_out = TS_funds[funds$Date >= as.Date("2015-08-01") & funds$Date <= as.Date("2019-07-31"),]
+TS_factors_out = TS_factors[factors$Date >= as.Date("2015-08-01") & factors$Date <= as.Date("2019-07-31"),]
+
+onefactorSP500 = timeSeries(factors$`Mkt-RF`, Time)
+
+T = dim(TS_funds)[1]
+k = dim(TS_funds)[2]
+
+# ---------------------------------------------------------------------------- #
+
+# Define In-sample period, Out-of-sample period, and Top Performing Funds
+outofsampleperiod = nrow(TS_funds_out) # Portfolio Construction (out of sample period)
+insample = T - outofsampleperiod  # Estimation (in sample period)
+TopProp = 0.2                   # proportion of top funds
+PlithosTop = round(TopProp*k)   # number of top performing funds
+
+
+#  Define In-sample returns and out-of-sample returns and factors
+Ret = TS_funds_in[1:insample, ]
+#dim(Ret)
+
+Ret_outofsample = TS_funds[(insample+1):T, ]
+#dim(Ret_outofsample)
+
+Fact = onefactorSP500[1:insample, ]
+#dim(Fact)
+```
+
+\newpage
+
+# Part A: Performance Evaluation
+
+## Sharpe Ratio
+
+In order to calculate the top performing fund based on Sharpe Ratio we need to calculate the following formula. 
+
+
+$$ \text{Sharpe Ratio} = \frac{E(R_i) - r_f}{\sigma_i} $$
+
+Then, we select the top 20% funds in terms of performance, we construct an equally weighted portfolio and then we can see and determine whether this ratio is effective or not based on the out-of-sample values and more specifically, the cumulative function that they create. If the graph has an upward trend, then it is effective.
+
+```{r Sharpe Ratio, echo = FALSE, message = FALSE, out.width = "50%", fig.align='center'}
+library(ggplot2)
+
+Dates = seq(as.Date("2015-08-01"), by = "month", length.out = nrow(funds_out))
+
+m_vec = var_vec = std_vec = numeric(ncol(Ret))
+for(i in 1:ncol(Ret)){
+  m_vec[i] = mean(na.omit(as.numeric(Ret[,i])))
+  var_vec[i] = var(na.omit(as.numeric(Ret[,i])))
+  std_vec[i] = sqrt(var_vec[i])
+}
+
+Sharpe_Ratio = m_vec/std_vec # Calculate Sharpe Ratio
+SRsorted = sort(Sharpe_Ratio,index.return = TRUE) # Sort all Sharpe Ratios from worse to best
+Sharpe_Ratio_Sorted = SRsorted$x # Keep values
+I_Sharpe_Ratio_Sorted = SRsorted$ix # Keep indexing
+I_Sharpe_Ratio_Use = I_Sharpe_Ratio_Sorted[(k-PlithosTop+1):k] # Keep top 20%
+
+
+# Construct equally weighted portfolios based on Sharpe Ratio
+returns_Sharpe_Ratio = Ret_outofsample[,I_Sharpe_Ratio_Use]
+#dim(returns_Sharpe_Ratio)
+
+MR_Sharpe = NULL
+for(i in 1:nrow(returns_Sharpe_Ratio)){
+  MR_Sharpe[i] = mean(na.omit(returns_Sharpe_Ratio[i,]))
+}
+
+CR_Sharpe = cumsum(MR_Sharpe)
+
+# Generate dates from August 2015 to December 2019
+dates = seq(as.Date("2015-08-31"), as.Date("2019-07-31"), by = "month")
+df = data.frame(Date = dates, CR_Sharpe_Value = CR_Sharpe)
+df$Date = as.character(df$Date)
+
+# Plot using ggplot2
+ggplot(df, aes(x = Dates, y = CR_Sharpe)) +
+  geom_line(aes(group = 1), color = "skyblue") +  # Connect points with lines
+  geom_point(color = "skyblue", size = 3) +  # Add points
+  theme_minimal() + # Reduce text size on x-axis
+  labs(x = "Date", y = "Value", title = "Cummulative values of Sharpe's Ratio by Date")
+```
+
+As we can see, the Sharpe Ratio is quite effective since in 4 years the portfolio has gained more than 40% of the initial value. 
+
+---
+
+## Treynor's Ratio
+
+In order to calculate the top performing fund based on Treynor's Ratio we need to calculate the following formula. 
+
+
+$$ \text{Treynor's Ratio} = \frac{E(R_i) - r_f}{\beta_i} $$
+
+Here, we will have to create a model with each fund "i" and then keep the coefficient that corresponds to the S&P500 variable.
+
+Similarly, a positive trend indicates a good metric for this portfolio.
+
+```{r Treynors Ratio, echo = FALSE, message = FALSE, out.width = "50%", fig.align='center'}
+# Compute security betas (different for each fund)
+betas = NULL
+for (i in 1:k) {
+  y = Ret[,i]  # i fund
+  x = Fact[,1] # S&P500
+  yres = lm(y ~ x) # model
+  beta = coef(yres)[2] # Keep the beta
+  betas = cbind(betas,beta) # collect betas
+}
+
+# Find the top performing fund based on TREYNOR RATIO
+Treynor_Ratio = m_vec/betas
+TRsorted = sort(Treynor_Ratio,index.return = TRUE)
+Treynor_Ratio_Sorted = TRsorted$x
+I_Treynor_Ratio_Sorted = TRsorted$ix
+I_Treynor_Ratio_Use = I_Treynor_Ratio_Sorted[(k-PlithosTop+1):k]
+
+# Construct equally weighted portfolios based on TREYNOR RATIO
+returns_Treynor_Ratio = Ret_outofsample[,I_Treynor_Ratio_Use]
+#dim(returns_Treynor_Ratio)
+
+MR_Treynor = NULL
+for(i in 1:nrow(returns_Treynor_Ratio)){
+  MR_Treynor[i] = mean(na.omit(returns_Treynor_Ratio[i,]))
+}
+CR_Treynor = cumsum(MR_Treynor)
+
+# Plot using ggplot2
+ggplot(df, aes(x = Dates, y = CR_Treynor)) +
+  geom_line(aes(group = 1), color = "purple") +  # Connect points with lines
+  geom_point(color = "purple", size = 3) +  # Add points
+  theme_minimal() + # Reduce text size on x-axis
+  labs(x = "Date", y = "Value", title = "Cummulative values of Treynor's Ratio by Date")
+```
+
+Even though in the beginning there is some variability around 0, eventually after 2017 the upward trend is clear.
+
+---
+
+## Sortino's Ratio
+
+In order to calculate the top performing fund based on Sortino's Ratio we need to calculate the following formula. 
+
+
+$$ \text{Sortino's Ratio} = \frac{E(R_i) - r_f}{\delta_{\text{i}}} $$
+Here, we have to calculate the "delta" for each fund "i" and then continue the analysis with the top 20% funds.
+
+```{r Sortinos Ratio, echo = FALSE, message = FALSE, out.width = "50%", fig.align='center'}
+# Find the top performing fund based on SORTINO RATIO
+deltas = NULL
+for (i in 1:k) {
+  y = na.omit(as.numeric(Ret[,i]))  
+  mvalue = mean(y)
+  minvec = NULL
+  for (j in 1:length(y))
+  {
+    minvechelp = min(0,(y[j] - mvalue))
+    minvec[j] = minvechelp
+  }
+  delta = sqrt(sum(minvec^2)/length(y))
+  deltas = cbind(deltas,delta)
+}
+
+Sortino_Ratio = m_vec/deltas
+SOsorted = sort(Sortino_Ratio,index.return = TRUE)
+SO_Sortino_Ratio_Sorted = SOsorted$x
+I_Sortino_Ratio_Sorted = SOsorted$ix
+I_Sortino_Ratio_Use = I_Sortino_Ratio_Sorted[(k-PlithosTop+1):k]
+
+# Construct equally weighted portfolios based on SORTINO RATIO
+returns_Sortino_Ratio = Ret_outofsample[,I_Sortino_Ratio_Use]
+#dim(returns_Sortino_Ratio)
+
+MR_Sortino = NULL
+for(i in 1:nrow(returns_Sortino_Ratio)){
+  MR_Sortino[i] = mean(na.omit(returns_Sortino_Ratio[i,]))
+}
+CR_Sortino = cumsum(MR_Sortino)
+
+ggplot(df, aes(x = Dates, y = CR_Sortino)) +
+  geom_line(aes(group = 1), color = "orange") +  # Connect points with lines
+  geom_point(color = "orange", size = 3) +  # Add points
+  theme_minimal() +  # Reduce text size on x-axis
+  labs(x = "Date", y = "Value", title = "Cummulative values of Sortino's Ratio by Date")
+```
+
+Similar image, the trend starts to launch after 2017.
+
+---
+
+## Jensen's alpha (Single Factor model)
+
+Last but not least, the Jensen's alpha. This will be the first part where we will use only the single factor model with the S&P500 variable.
+
+In order to calculate the top performing fund based on Sortino's Ratio we need to calculate the following formula. 
+
+
+$$ \alpha_i = E(R_i) - [r_f + \beta_p \cdot (E(R_M) - r_f)] $$
+
+```{r Jensens alpha, echo = FALSE, message = FALSE, out.width = "50%", fig.align='center'}
+# Compute alphas from the Single index model (different for each fund)
+alphas = NULL
+yres = NULL
+for (i in 1:k) {
+  y = Ret[,i]  
+  x = Fact[,1]
+  yres[[i]] = lm(y ~ x)
+  alpha = coef(yres[[i]])[1]
+  alphas = cbind(alphas,alpha)
+}
+
+# Find the top performing fund based on JENSEN ALPHA
+JAsorted = sort(alphas, index.return = TRUE)
+Jensen_alpha_Sorted = JAsorted$x
+I_Jensen_alpha_Sorted = JAsorted$ix
+I_Jensen_alpha_Use = I_Jensen_alpha_Sorted[(k-PlithosTop+1):k]
+
+# Construct equally weighted portfolios based on JENSEN ALPHA
+returns_Jensen_alpha = Ret_outofsample[,I_Jensen_alpha_Use]
+#dim(returns_Jensen_alpha)
+
+MR_Jensen = NULL
+for(i in 1:nrow(returns_Jensen_alpha)){
+  MR_Jensen[i] = mean(na.omit(returns_Jensen_alpha[i,]))
+}
+CR_Jensen = cumsum(MR_Jensen)
+
+ggplot(df, aes(x = Dates, y = CR_Jensen)) +
+  geom_line(aes(group = 1), color = "green") +  # Connect points with lines
+  geom_point(color = "green", size = 3) +  # Add points
+  theme_minimal() +  # Reduce text size on x-axis
+  labs(x = "Date", y = "Value", title = "Cummulative values of Jensen's alpha by Date")
+```
+
+Once more, we get a positive result.
+
+---
+
+## Aggregated 
+
+Now, if we try to plot all the above models into one plot, we will notice something rather interesting. 
+
+```{r Aggregated plot, echo = FALSE, message = FALSE, out.width = "50%", fig.align='center'}
+df = as.data.frame(cbind(CR_Sharpe, CR_Treynor, CR_Sortino, CR_Jensen))
+df$Dates = seq(as.Date("2015-08-01"), by = "month", length.out = nrow(df))
+
+# Reshape data from wide to long format
+df_long = df %>%
+  gather(key = "variable", value = "value", -Dates)
+
+# Create ggplot
+ggplot(df_long, aes(x = Dates, y = value, color = variable)) +
+  geom_line() +
+  labs(title = "Comparison of Metrics",
+       x = "Time",
+       y = "Value",
+       color = "Variable") +
+  theme_minimal()
+```
+
+It seems that 3 out of 4 metrics have exactly the same values and there is an overlapping scene. The one that is different than the others is the Treynor's Ratio which doesn't seem to be very far away from the other values.
+
+\newpage
+
+
+## Jensen's alpha (Multiple Regression - Model selection)
+
+Now, the continuation has to do with Jensen's alpha again, but with different modelling approaches.
+
+```{r Multiple Regression, echo = FALSE, message = FALSE, out.width = "75%", fig.align='center'}
+
+# alphas = NULL
+# for (i in 1:k) {
+#   
+#   y = as.numeric(Ret[,i]) 
+#   z = which(is.na(y) == TRUE)
+#   y = na.omit(y)
+#   
+#   if(length(z) == 0){
+#     yres = lm(y ~ ., data = factors_in[,-1]) # full model
+#   } else{
+#     yres = lm(y ~ ., data = factors_in[-z,-1]) # full model
+#   }
+#   
+#   A = ols_step_best_subset(yres) # See models' AIC
+#   best = as.character(A$predictors[which(A$aic == min(A$aic))]) # Find the variables with least AIC
+#   best = unlist(strsplit(best, " ")) # Split them
+#   
+#   formula_string = paste("y ~", paste(best, collapse = " + ")) # Create a formula format
+#   formula = as.formula(formula_string) # Make it a formula
+#   
+#   
+#   if(length(z) == 0){
+#     model = lm(formula, data = factors_in[, -1]) # Apply regression for the best model
+#   } else{
+#     model = lm(formula, data = factors_in[-z, -1]) # Apply regression for the best model
+#   }
+# 
+#   alphas[i] = model$coefficients[1] # Keep only intercept
+# }
+# 
+# # Find the top performing fund based on JENSEN ALPHA
+# multi_JAsorted = sort(alphas, index.return = TRUE)
+# multi_Jensen_alpha_Sorted = multi_JAsorted$x
+# multi_I_Jensen_alpha_Sorted = multi_JAsorted$ix
+# multi_I_Jensen_alpha_Use = multi_I_Jensen_alpha_Sorted[(k-PlithosTop+1):k]
+# 
+# # Construct equally weighted portfolios based on JENSEN ALPHA
+# returns_Jensen_alpha = Ret_outofsample[,multi_I_Jensen_alpha_Use]
+# #dim(returns_Jensen_alpha)
+# 
+# multi_MR_Jensen = NULL
+# for(i in 1:nrow(returns_Jensen_alpha)){
+#   multi_MR_Jensen[i] = mean(na.omit(returns_Jensen_alpha[i,]))
+# }
+# multi_CR_Jensen = cumsum(multi_MR_Jensen)
+# 
+# ggplot(df, aes(x = Dates, y = multi_CR_Jensen)) +
+#   geom_line(aes(group = 1), color = "black") +  # Connect points with lines
+#   geom_point(color = "black", size = 3) +  # Add points
+#   theme_minimal() +  # Reduce text size on x-axis
+#   labs(x = "Date", y = "Value", title = "Cummulative values of Jensen's alpha by Date with Multiple Regression")
+```
+
+## Jensen's alpha (GARCH model)
+
+```{r GARCH model, echo = FALSE, message = FALSE, out.width = "75%", fig.align='center'}
+
+# Initialize a list to store alphas for each fund
+alphas = list()
+# Loop through each fund and fit a linear regression model
+for (fund in 2:(length(names(funds_in)[-1])+1)) {
+  fund_returns = funds_in[[fund]]
+  
+  # Prepare the data for the regression
+  X = as.matrix(factors_in[, -1])
+  y = fund_returns
+  
+  # Fit a linear regression model
+  model = lm(y ~ X)
+  
+  # Extract Jensen's alpha (intercept)
+  alpha = coef(model)[1]
+  alphas[[fund-1]] = alpha
+  names(alphas[[fund-1]]) = fund-1
+}
+
+# Select top 20% funds based on alpha
+top_funds = names(sort(unlist(alphas), decreasing = TRUE)[1:round(length(alphas) * 0.2)])
+top_funds
+# Construct an equally weighted portfolio for the out-of-sample period
+portfolio_returns = rowMeans(funds_out[,as.numeric(top_funds)])
+
+# Merge the portfolio returns with out-of-sample factors
+out_sample_data = cbind(Date = funds_out$Date, Portfolio = portfolio_returns, factors_out[-1])
+
+# Fit the linear regression model for the portfolio in the out-of-sample period
+X_out_sample = as.matrix(out_sample_data[, -c(1,2)])
+y_out_sample = out_sample_data$Portfolio
+
+
+# Fit a linear regression model to get residuals
+model_out_sample = lm(y_out_sample ~ X_out_sample)
+
+# Extract residuals from the model
+residuals_out_sample = residuals(model_out_sample)
+
+# Fit the GARCH(1,1) model to the residuals
+garch_model = garch(residuals_out_sample, order = c(1, 1))
+
+# Extract Jensen's alpha for the out-of-sample period (intercept term)
+alpha_out_sample = coef(garch_model)[1]
+
+# Print the results
+print(paste("Jensen's alpha for the equally weighted portfolio in the out-of-sample period is:", round(alpha_out_sample,5)))
+
+```
+
+\newpage
+
+# Part B: Portfolio Construction
+
+## Sample estimate of mean and covariance matrix
+
+Estimating the mean vector and covariance matrix using a sample period involves straightforward calculations based on historical data. This approach assumes that the historical returns provide a reasonable estimate of future expected returns and risk.
+
+To estimate the mean vector, we compute the average return for each asset over the historical period. This is calculated as:
+
+$$ \mu_i = \frac{1}{T}\sum^T_{t = 1}r_{i,t}$$
+
+The covariance matrix estimates the pairwise relationships (covariances) between assets, reflecting their joint variability over time. It is computed as:
+
+$$ \sum = \frac{1}{T-1}\sum^T_{t = 1}(r_{i,t} - \mu_i)*(r_{j,t} - \mu_j)$$
+
+Advantages:
+
+* Simplicity: This method is straightforward to implement and understand, requiring basic calculations of means and variances.
+* Use of Historical Data: It utilizes all available historical data, making it a comprehensive approach.
+* Flexibility: It can be easily adapted to different subsets of data or varying time periods.
+Limitations:
+
+* Assumption of Stationarity: Assumes that the mean and covariance structure of returns are stationary over time, which may not always hold true in practice.
+* Sensitive to Outliers: Historical data may include extreme events (outliers) that can distort estimates of mean and variance.
+* Short-Term Bias: Recent data may disproportionately influence estimates, potentially not reflecting long-term trends accurately.
+
+In summary, the sample estimate approach provides a practical way to estimate mean returns and covariances based on historical data, offering simplicity and comprehensiveness but requiring careful consideration of its assumptions and limitations.
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+# Mean vector estimation
+mean_returns = NULL
+for(i in 2:ncol(funds_in)){
+  mean_returns[i-1] = mean(as.numeric(na.omit(funds_in[,i])))
+}
+funds_in_imputed = as.data.frame(apply(funds_in[, -1], 2, function(x) imputeTS::na.mean(x))) # Trying to handle the missing data
+
+# Calculate covariance matrix
+cov_matrix = cov(funds_in_imputed)
+
+# Define a function to compute the minimum variance portfolio
+minvar_portfolio = function(cov_matrix) {
+  
+  n = ncol(cov_matrix) # Number of assets
+  
+  # Objective is to minimize (1/2) * t(w) %*% cov_matrix %*% w
+  # Constraints: sum(w) = 1 and w >= 0 (no short-selling)
+  
+  # Formula parameters
+  Dmat = cov_matrix
+  dvec = rep(0, n)
+  Amat = cbind(rep(1, n), diag(n))
+  bvec = c(1, rep(0, n))
+  
+  # Solve the quadratic programming problem
+  result = solve.QP(Dmat, dvec, Amat, bvec, meq = 1)
+  
+  # Extract the weights
+  weights = result$solution
+  return(weights)
+}
+
+# Calculate minimum variance portfolio weights
+mv_weights = minvar_portfolio(cov_matrix)
+
+# Calculate expected return and volatility
+mv_expected_return = sum(mean_returns %*% mv_weights)
+mv_volatility = sqrt(t(mv_weights) %*% cov_matrix %*% mv_weights)
+```
+
+The outcome of this analysis is the following: 
+
+`r print(paste("Expected Return:", round(mv_expected_return,5)))`
+
+`r print(paste("Volatility:", round(mv_volatility,5)))`
+
+---
+
+## Single Factor Model
+
+The Single Index Model (SIM) is a method for estimating the mean vector and covariance matrix of asset returns using a market index as a proxy for systematic risk (market risk). It assumes that the returns of individual assets can be explained by their exposure to systematic risk factors, primarily represented by the returns of a market index.
+
+In the context of the Single Index Model:
+
+Mean Vector Estimation:
+The mean return of an asset 
+
+$$ \mu_i = \alpha_i + \beta_i*\mu_{market}$$
+
+where $\mu_i$
+  is the mean return of asset i, $\alpha_i$ is the asset-specific expected excess return (alpha), $\beta_i$ is the asset's sensitivity (beta) to the market index, and $\mu_{market}$  is the expected return of the market index.
+
+Covariance Matrix Estimation:
+The covariance between the returns of two assets
+
+$$\sigma_{ij} = \beta_i*\beta_j*\sigma^2_{market}$$
+
+Advantages:
+
+* Systematic Risk Focus: Captures the relationship between asset returns and the market index, emphasizing systematic risk factors.
+* Portfolio Construction: Facilitates portfolio optimization by focusing on factors that influence the entire market.
+* Risk Management: Provides insights into how individual assets contribute to overall portfolio risk.
+
+Limitations:
+
+* Model Assumptions: Relies on the assumption that asset returns can be adequately explained by market factors, which may oversimplify complex market dynamics.
+* Data Requirements: Requires accurate estimation of beta coefficients, which can be sensitive to the choice of market index and time period.
+* Dynamic Nature: Market conditions may change over time, affecting the stability of beta coefficients and model predictions.
+
+In conclusion, the Single Index Model offers a structured approach to estimate mean returns and covariances by relating individual asset returns to market index returns. It provides valuable insights into systematic risk factors but requires careful consideration of its underlying assumptions and limitations in practical applications.
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+sp500_returns = factors_in[,"Mkt-RF"]
+funds_excess_returns = funds_in - factors_in[,"Mkt-RF"]
+funds_excess_returns = funds_excess_returns[,-1]
+
+# Calculate betas and alphas using linear regression
+betas = sapply(funds_excess_returns, function(x) lm(x ~ sp500_returns)$coefficients[2])
+alphas = sapply(funds_excess_returns, function(x) lm(x ~ sp500_returns)$coefficients[1])
+
+# Estimate the mean vector
+mean_vector = alphas + betas * mean(sp500_returns)
+
+# Estimate the covariance matrix
+betas_matrix = matrix(rep(betas, each = nrow(funds_excess_returns)), nrow = nrow(funds_excess_returns), byrow = TRUE)
+
+market_component = betas_matrix * sp500_returns
+
+residuals = funds_excess_returns - market_component
+
+residual_var = NULL
+for(i in 1:90){
+  residual_var[i] = var(na.omit(residuals[i]))
+}
+market_var = var(sp500_returns)
+
+cov_matrix = outer(betas, betas) * market_var + diag(residual_var)
+
+# Target return
+Rtarget = 0.005 # Example target return
+
+# Construct minimum variance portfolio
+min_var_port = solve.QP(Dmat = cov_matrix, dvec = rep(0, ncol(cov_matrix)), 
+                         Amat = cbind(rep(1, ncol(cov_matrix)), mean_vector), 
+                         bvec = c(1, Rtarget), meq = 1)
+
+min_var_weights = min_var_port$solution
+
+# Construct mean-variance portfolio
+mean_var_port = solve.QP(Dmat = cov_matrix, dvec = rep(0, ncol(cov_matrix)), 
+                          Amat = cbind(rep(1, ncol(cov_matrix)), mean_vector), 
+                          bvec = c(1, Rtarget), meq = 1)
+
+mean_var_weights = mean_var_port$solution
+
+# Subset data for out-of-sample period
+
+# Find the starting and ending indices for the out-of-sample period
+start_date = as.Date("2015-08-01")
+end_date = as.Date("2019-07-31")
+dates = seq.Date(as.Date("1963-07-01"), by = "month", length.out = nrow(funds))
+
+# Subset data for out-of-sample period
+out_sample_indices = which(dates >= start_date & dates <= end_date)
+funds_outs = funds[out_sample_indices, ]
+
+# Ensure column names match
+colnames(funds_outs) = colnames(funds)
+
+funds_out = as.matrix(funds[out_sample_indices, -1])  # Remove the date column and convert to matrix
+
+# Calculate out-of-sample returns for both portfolios
+min_var_returns = rowSums(funds_out * min_var_weights)
+mean_var_returns = rowSums(funds_out * mean_var_weights)
+
+
+# Evaluation metrics
+# (i) Realized returns
+realized_returns_min_var = mean(min_var_returns)
+realized_returns_mean_var = mean(mean_var_returns)
+
+# (ii) Cumulative returns
+cumulative_returns_min_var = cumprod(1 + min_var_returns) - 1
+cumulative_returns_mean_var = cumprod(1 + mean_var_returns) - 1
+
+SIM = data.frame(min_var = realized_returns_min_var, 
+                 mean_var = realized_returns_mean_var,
+                 cumul_min_var = cumulative_returns_min_var,
+                 cumul_mean_var = cumulative_returns_mean_var)
+
+
+
+head(SIM)
+```
+

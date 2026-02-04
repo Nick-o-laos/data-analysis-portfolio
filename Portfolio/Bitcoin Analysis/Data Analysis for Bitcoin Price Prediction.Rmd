@@ -1,0 +1,1543 @@
+---
+title: "Data Analysis for Bitcoin Price Prediction"
+subtitle: "Assignment in Statistics for Finance, UniPv"
+author: "Nikolaos Papadopoulos & Riccardo Parussini"
+date: "`r Sys.Date()`"
+fontsize: 10pt
+mainfont: Times New Roman
+linestretch: 1.2
+output: 
+  pdf_document:
+    toc: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, echo=FALSE, include=FALSE}
+# Loading necessary libraries and packages
+library(dplyr) ; library(psych) ; library(lubridate) ; library(readxl) ; library(ggplot2) ; library(patchwork) ; library(corrplot) ; library(knitr) ; library(timeSeries) ; library(forecast) ; library(tseries) ; library(rugarch) ; library(lmtest) ; library(car) ; library(tidyr); library(olsrr); library(MASS) ; library(caret) ; library(party) ; library(neuralnet) ; library(randomForest) ; library(pROC)
+```
+
+\newpage
+
+# 1. Introduction
+
+## 1.1. Data presentation
+
+```{r df dataset, echo=FALSE}
+# Importing data 
+df = as.data.frame(read_excel("C:/users/nicko/Documents/DATA_Bitcoin.xlsx"))
+vol = as.data.frame(read_excel("C:/Users/nicko/Documents/Marketcap-Volume-Atr.xlsx"))[,6]
+vol = as.numeric(gsub(",", "", vol))
+
+#df = as.data.frame(read_excel("DATA_Bitcoin .xlsx"))
+colnames(df) = c("Date", "Bitcoin", "Oil", "Gold", "USD_EUR", "USD_YUAN", "SP500")
+kable(rbind(head(df, 2), tail(df, 2)))
+```
+
+
+## 1.2. Data manipulation
+
+```{r Time Series, echo=FALSE, warning=FALSE}
+Time = seq(as.Date(df$Date[1]), as.Date(df$Date[length(df$Date)]), by = "1 day")
+
+Assets = timeSeries(df[,-1], Time)
+Ret = returns(Assets, method = "simple")
+
+colnames(Assets) = c("Bitcoin", "Oil", "Gold", "USD_EUR", "USD_YUAN", "SP500")
+```
+
+
+```{r Dumb Variable, echo=FALSE, warning=FALSE}
+# Creating a dummy variable so that we can separate weekdays from weekends
+Z = NULL
+for(i in 1:nrow(Ret)){
+  if(Ret[i,2] == 0 && Ret[i,3] == 0 && Ret[i,4] == 0 && Ret[i,5] == 0 &&Ret[i,6] == 0){
+    Z[i] = 0
+  } else {
+    Z[i] = 1
+  }
+}
+Assets = cbind(Assets, Z)
+names(Assets)[7] = "Dummy"
+Ret = cbind(Ret, Z)
+names(Ret)[7] = "Dummy"
+```
+
+```{r Assets and Ret dataset, echo=FALSE, warning=FALSE}
+index1 = rbind(head(Assets, 2), tail(Assets, 2))
+colnames(index1) = c("Bitcoin", "Oil", "Gold", "USD_EUR", "USD_YUAN", "SP500", "Dummy")
+kable(index1)
+
+index2 = round(rbind(head(Ret, 2), tail(Ret, 2)), 3)
+colnames(index2) = c("Bitcoin", "Oil", "Gold", "USD_EUR", "USD_YUAN", "SP500", "Dummy")
+kable(index2)
+```
+
+
+\newpage
+
+
+# 2. Explanatory Data Analysis
+## 2.1. EDA on Prices
+
+### 2.1.1. Summary Statistics
+
+```{r Summary Stats, echo=FALSE}
+kable(round(describe(Assets[,1:6])[,2:7], 2))
+kable(round(describe(Assets[,1:6])[,8:ncol(describe(Assets[,1:6]))], 2))
+```
+
+
+### 2.1.2. Price Charts
+
+```{r Price Charts, echo=FALSE, warning=FALSE}
+titles = c("Bitcoin Price", "Oil Price", "Gold Price", 
+            "USD_EUR Price", "USD_YUAN Price", "SP500 Price")
+colors = c("darkcyan", "black", "darkgoldenrod", 
+            "darkgreen", "darkmagenta", "darkred")
+
+for (i in seq_along(titles)) {
+  plotaki = ggplot(Assets, aes(x = Time, y = as.numeric(Assets[,i]))) +
+    geom_line(color = colors[i]) +
+    labs(title = titles[i],
+         x = "Date",
+         y = "Price") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20))
+  
+  print(plotaki)
+}
+
+ggplot(Assets, aes(x = Time, y = vol)) +
+    geom_line(color = "darkblue") +
+    labs(title = "Volume",
+         x = "Date",
+         y = "Volume") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20))
+```
+
+
+### 2.1.4. Correlation plot of Assets
+
+```{r Correlation plot of Assets, echo=FALSE}
+M1 = cor(Assets[,-7])
+
+col = colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
+corrplot(M1, method="color", col=col(200),  
+         diag = FALSE,
+         type = "lower", 
+         order = "hclust", 
+         title = "Correlation plot of Assets", 
+         addCoef.col = "black", # Add coefficient of correlation
+         mar = c(0,0,1,0)
+)
+```
+
+
+\newpage
+
+
+## 2.2. EDA on Returns
+
+### 2.2.1. Summary Statistics of returns
+
+```{r Return Summary, echo=FALSE, warning=FALSE}
+kable(round(describe(Ret[,-7])[,2:7], 2))
+kable(round(describe(Ret[,-7])[,8:ncol(describe(Ret))], 2))
+```
+
+
+### 2.2.2. Distribution of Assets daily returns
+
+(Talk about nature of distributions, normality, skew,  kurt, range, summary stats)
+
+
+ITS ONLY THE WEEKDAYS FOR ASSETS EXCEPT BTC
+
+```{r Historgram of BTC returns, echo=FALSE}
+hist(Ret[,1], breaks = 50, main = "Distribution of BTC returns")
+
+for(i in 2:6){
+  colname = colnames(Ret[,i])
+  Ret_weekdays = Ret[which(Ret[,i] != 0), i]
+  hist(Ret_weekdays, breaks = 50, main = paste("Distribution of", colname, "returns"), col = colors[i], xlab = titles[i])
+}
+```
+
+### 2.2.3. Correlation on daily Returns
+
+```{r correlation plot 2, echo=FALSE}
+M2 = cor(Ret[,-7])
+col = colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
+corrplot(M2, method="color", col=col(200),  
+         diag = FALSE,
+         type = "lower", 
+         order = "hclust", 
+         title = "Correlation plot of Asset Returns", 
+         addCoef.col = "black", # Add coefficient of correlation
+         mar = c(0,0,1,0)
+)
+```
+
+
+
+## 2.3. Linear Regression
+
+### 2.3.1. Linear relationships
+
+```{r simple linear regressions, echo=FALSE, include=FALSE}
+attach(Ret)
+par(mfrow = c(2,3))
+plot(Oil, Bitcoin)
+plot(Gold, Bitcoin)
+plot(USD_EUR, Bitcoin)
+plot(USD_YUAN, Bitcoin)
+plot(SP500, Bitcoin)
+plot(returns(vol, method = "simple")[-1], Ret$Bitcoin, xlab = "Volume", ylab = "Bitcoin")
+par(mfrow = c(1,1))
+detach(Ret)
+```
+
+
+## 2.4. Inspecting abnormalities
+
+```{r Abnormalities, echo=FALSE}
+# Huge decrease in Oil price
+kable(Assets[(which(Assets$Oil<=0) - 1):(which(Assets$Oil<=0) + 1),])
+
+# Huge decreases in BTC price
+kable(round(Ret[(which(Ret[,1] < -0.3) - 1) : (which(Ret[,1] < -0.3) + 1),],3))
+```
+
+
+# 3. Models
+
+## 3.1. Asset Prices without the Volume variable
+
+The saturated model would make sense to have the following structure
+
+$$
+Bitcoin_t = (\beta_0 + \beta_1 Oil_t + \beta_2Gold_t + \beta_3UsdEur_t + \beta_4UsdYuan_t + \beta_5 SP500_t) * Z_t + \phi_0 + \phi_1Y_{t-1} + ... + \phi_pY_{t-p} + \psi_0 + \psi_1\epsilon_t + ... + \psi_q\epsilon_{t-q}
+$$
+
+where $\epsilon_t \sim WN(0,\sigma_t^2)$ and
+
+$$
+\sigma_t^2 = \alpha_0 + \alpha_1\epsilon_{t-1} + ... + \alpha_k\epsilon_{t-k} + \gamma_0 + \gamma_1\sigma_{t-1}^2 + ... +  \gamma_m\sigma_{t-m}^2
+$$
+
+The parameters $\alpha_0$ and $\gamma_0$ can be summed up and give us $\omega$ like so
+
+$$
+\sigma_t^2 = \omega + \alpha_1\epsilon_{t-1} + ... + \alpha_k\epsilon_{t-k} + \gamma_1\sigma_{t-1}^2 + ... +  \gamma_m\sigma_{t-m}^2
+$$
+
+The above formula can be written also in a form of summations
+
+$$
+\sigma_t^2 = \omega + \sum_{k=1}^k{\alpha_k\epsilon_{t-k}} + \sum_{m=1}^m{\gamma_m\sigma_{t-m}^2}
+$$
+
+where the $\beta$ coefficients are generated from the multiple regression part of the model. The $\phi_p$ parameters are generated from the AR(p) part of the model and the $\psi_q$ parameters are generated from the MA(q) part of the model. The $\alpha_k$ parameters are generated from the ARCH(k) part of the model and the $\gamma_m$ are generated from the GARCH(m) part of the model.
+
+### 3.1.1. Multiple regression part
+
+For this part of the analysis we are going to split the data set into train and test. The train data set will hold the observations of the prices and the returns respectively (the returns have 1 day less which is the first day of the prices data frame) of our variables from the first day observed, which is the 2016-05-18 until the last day of 2023-12-31. Apparently, the test data set will include all the days of 2024, meaning from the 2024-01-01 up to the last day of observations, 2024-05-31.
+
+```{r Split train and test, echo=FALSE}
+train_Assets = Assets[1:(which(Time == "2022-12-31")),]
+test_Assets = Assets[which(Time == "2023-01-01"):nrow(Assets),]
+
+train_Assets_clean = train_Assets[train_Assets$Dummy == 1,]
+test_Assets_clean = test_Assets[test_Assets$Dummy == 1,]
+```
+
+After splitting the data, we are ready to perform the first attempt of the multiple regression. Our approach is as follows: We remove all the weekends since all the X variables we have are the same for the prices' data set during these days and apparently 0 for the returns' data set. The main idea purpose is to model the BTC price or returns with some actual values of the assets and then calculate the $\beta$ parameters and then replace them to the model mentioned above. Keep in mind that in the above model, the assets include also the weekends.
+
+```{r MR model, echo = FALSE}
+mod1 = lm(Bitcoin ~ ., data = train_Assets_clean[,-7])
+
+# Checking for different assumptions
+par(mfrow = c(2,2))
+plot(mod1, pch = 16, cex = 0.5)
+
+##### Linearity #####
+# Apply powerTransform to selected non-linear variables
+lambda = powerTransform(mod1)$lambda # Finding best lambda 
+
+# Apply lambda to Bitcoin price in different data frames
+train_Assets_clean$transBit = train_Assets_clean$Bitcoin^lambda # Creating column with the transformed BTC prices
+train_Assets$transBit = train_Assets$Bitcoin^lambda
+test_Assets$transBit = test_Assets$Bitcoin^lambda
+
+mod2 = lm(transBit ~ ., data = train_Assets_clean[,-c(1,7)])
+summary(mod2) # better
+crPlots(mod2)
+
+##### Fit Final Multiple Regression Model #####
+betas = mod2$coefficients
+```
+
+```{r, echo=FALSE}
+# Predict Y using the fixed betas
+train_Assets = as.data.frame(train_Assets) %>% 
+  mutate(
+    Bitcoin_pred = betas[1] + 
+             betas[2] * Oil + 
+             betas[3] * Gold + 
+             betas[4] * USD_EUR + 
+             betas[5] * USD_YUAN + 
+             betas[6] * SP500
+  )
+
+
+# Also for the test dataset
+test_Assets = as.data.frame(test_Assets) %>% 
+  mutate(
+    Bitcoin_pred = betas[1] + 
+             betas[2] * Oil + 
+             betas[3] * Gold + 
+             betas[4] * USD_EUR + 
+             betas[5] * USD_YUAN + 
+             betas[6] * SP500
+  )
+
+# Calculate residuals
+train_Assets = as.data.frame(train_Assets) %>%
+  mutate(Residuals = transBit - Bitcoin_pred)
+
+test_Assets = as.data.frame(test_Assets) %>%
+  mutate(Residuals = transBit - Bitcoin_pred)
+```
+
+### 3.1.2. ACF and PACF plots
+
+```{r ARIMA, echo = FALSE}
+# Fit an ARIMA(1, 0, 1) model
+par(mfrow = c(1,2))
+acf(train_Assets$Residuals, main = "ACF for BTC")
+pacf(train_Assets$Residuals, main = "PACF for BTC")
+par(mfrow = c(1,1))
+```
+
+
+```{r Adding lag weekends 5, echo=FALSE}
+# Add ARIMA residual predictions and GARCH variance
+BTC_lag1 = (1 - test_Assets$Dummy)*lag(test_Assets$Bitcoin_pred, 1) # For the weekends
+BTC_lag1[1] = 0 # First value should be 0
+```
+
+```{r, echo=FALSE}
+trans_final_predictions = test_Assets$Bitcoin_pred * test_Assets$Dummy + BTC_lag1
+test_Assets$Preds = trans_final_predictions^(1/lambda)
+```
+
+```{r Plotting the result 1, echo=FALSE}
+# If time is already a time series, skip this line
+test_Assets$time = as.Date(row.names(test_Assets))
+
+# Convert to long format for ggplot
+long_data = pivot_longer(test_Assets, cols = c(Bitcoin, Preds), 
+                          names_to = "Type", values_to = "Price")
+
+# Plot
+ggplot(long_data, aes(x = time, y = Price, color = Type)) +
+  geom_line(size = 1.2) +
+  labs(title = "Bitcoin vs Predictions Over Time",
+       x = "Time",
+       y = "Price",
+       color = "Legend") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20))
+```
+
+$$
+Bitcoin_t = (\beta_0 + \beta_1 Oil_t + \beta_2Gold_t + \beta_3UsdEur_t + \beta_4UsdYuan_t + \beta_5 SP500_t) * Z_t + (1-Z_t)*Bitcoin_{t-1}
+$$
+
+
+```{r, echo=FALSE}
+# R²
+SSE = sum((test_Assets$Bitcoin - test_Assets$Preds)^2)
+SSR = sum((test_Assets$Preds - mean(test_Assets$Bitcoin))^2)
+SSTO = SSE + SSR
+print(paste("The R² is", round(1 - (SSE / SSTO), 2)))
+
+# MSE
+residuals = test_Assets$Bitcoin - test_Assets$Preds
+MSE = mean(residuals^2)
+print(MSE)
+
+# AIC
+n = length(test_Assets$Bitcoin)
+SS_res = sum(residuals^2)
+# Number of parameters (k): The count of regression parameters + GARCH parameters
+k = 2 + 2
+AIC = n * log(SS_res / n) + 2 * k
+print(AIC)
+
+# BIC
+BIC = n * log(SS_res / n) + k * log(n)
+print(BIC)
+```
+
+## 3.2. Returns without the Volume variable
+
+In this case, the model that we are going to examine will concern the returns of both the BTC prices and all of the Assets. Additionally to that, we will also include the ARIMA and GARCH part.
+
+The model will have the following structure
+
+$$
+R^{BTC}_t = \beta_0 + \beta_1R^{Oil}_{t} + \beta_2R^{Gold}_{t} + \beta_3R^{UsdEur}_{t} + \beta_4R^{UsdYuan}_{t} + \beta_5R^{SP500}_{t} + \phi_0 + \phi_1R^{BTC}_{t-1} + ... + \phi_pR^{BTC}_{t-p} + \psi_0 + \psi_1\epsilon_t + ... + \psi_q\epsilon_{t-q}
+$$
+
+The only difference is that we remove the multiplication with the Dummy variable since during weekends, the returns of the prices become 0 because the prices stay fixed for both weekend days.
+
+### 3.2.1. Fitting Multiple Regression part
+
+```{r Returns train/test, echo=FALSE}
+# Split Data into Training and Testing Sets for Returns
+train_Ret = Ret[1:(which(Time == "2022-12-31")-1),]
+test_Ret = Ret[which(Time == "2023-01-01"):nrow(Ret),]
+
+train_Ret_clean = train_Ret[train_Ret$Dummy == 1,][,-which(colnames(train_Ret) == "Dummy")]
+test_Ret_clean = test_Ret[test_Ret$Dummy == 1,][,-which(colnames(test_Ret) == "Dummy")]
+```
+
+```{r Model attempt, echo=FALSE}
+modello1 = lm(Bitcoin ~ ., data = train_Ret_clean[,-7])
+
+# Selecting the best variables in terms of BIC
+ols_modello1 = ols_step_best_subset(modello1)
+vars = ols_modello1$predictors[as.numeric(which(min(ols_modello1$sbic) == ols_modello1$sbic))]
+# vars = ols_modello1$metrics$predictors[as.numeric(which(min(ols_modello1$metrics$sbic) == ols_modello1$metrics$sbic))]
+split_vector = unlist(strsplit(vars, " "))
+formula = as.formula(paste("Bitcoin", "~", (paste(split_vector, collapse = "+"))))
+
+modello2 = lm(formula, data = train_Ret_clean)
+
+#####===== ASSUMPTIONS =====#####
+### Homoskedasticity ###
+plot(modello2$residuals, type = "l")
+
+# Normality
+shapiro.test(mod2$residuals) # Not okay
+
+
+#####===== Adding Predictions for the weekdays from our model =====#####
+##### Fit Final Multiple Regression Model #####
+betas = modello2$coefficients
+
+# Predict Y using the fixed betas
+train_Ret = as.data.frame(train_Ret) %>% 
+  mutate(
+    Bitcoin_pred = betas[1] + 
+             betas[2] * Gold +
+             betas[3] * SP500
+  )
+
+# Also for the test dataset
+test_Ret = as.data.frame(test_Ret) %>% 
+  mutate(
+    Bitcoin_pred = betas[1] + 
+             betas[2] * Gold +
+             betas[3] * SP500
+  )
+
+
+#####===== Adding Residuals for the weekdays from our model =====#####
+
+# Calculate residuals
+train_Ret = as.data.frame(train_Ret) %>%
+  mutate(Residuals = Bitcoin - Bitcoin_pred)
+
+test_Ret = as.data.frame(test_Ret) %>%
+  mutate(Residuals = Bitcoin - Bitcoin_pred)
+```
+
+For the multiple regression part, the final model is $R^{BTC}_t = \beta_0 + \beta_1R^{Gold}_t + \beta_2R^{SP500}_t$
+
+### 3.2.2. ARIMA part
+
+First we are testing for stationarity
+
+```{r, echo=FALSE}
+BTC = train_Ret$Bitcoin
+
+# Step 1: Check for stationarity
+adf_test = adf.test(BTC)  # Augmented Dickey-Fuller test
+kpss_test = kpss.test(BTC)  # KPSS test
+
+cat("ADF Test p-value: ", adf_test$p.value, "\n")
+cat("KPSS Test p-value: ", kpss_test$p.value, "\n")
+
+if (adf_test$p.value > 0.05) {
+  cat("Data is likely non-stationary (ADF test failed). Consider differencing.\n")
+} else {
+  cat("Data is stationary (ADF test passed).\n")
+}
+
+if (kpss_test$p.value < 0.05) {
+  cat("Data is likely non-stationary (KPSS test failed). Consider differencing.\n")
+} else {
+  cat("Data is stationary (KPSS test passed).\n")
+}
+```
+
+The data are stationary so we can continue wuth the ARIMA and GARCH analysis
+
+```{r, echo=FALSE}
+# Fit ARIMA to residuals
+arima_model = auto.arima(train_Ret$Residuals)
+par(mfrow = c(1,2))
+acf(train_Ret$Residuals, main = "ACF for BTC")
+pacf(train_Ret$Residuals, main = "PACF for BTC")
+par(mfrow = c(1,1))
+```
+
+ARIMA model is skata, so ARIMA(0,0,0)
+
+### 3.2.3. GARCH part
+
+In this GARCH analysis, we decided to make a selection of the component that we have to use. Previously we selected the GARCH components by checking at the graphs and "guessing" which are going to be the best for the model.
+
+However, the following analysis combines an algorithmic technique that allows us to investigate several different combinations of the GARCH components and eventually selecting the one that gives the best results based on some model information criterion. In our case, this will be the SBIC.
+
+```{r, echo=FALSE}
+
+# Step 4: Build the GARCH model
+n = k = 3
+models_bic = matrix(rep(0,n*k), nrow = n, ncol = k)
+for(j in 1:k){
+  for(i in 1:n){
+    x = c(i,j)
+    spec = ugarchspec(
+      variance.model = list(model = "sGARCH", garchOrder = x),
+      mean.model = list(armaOrder = c(0,0)),
+      distribution.model = "std")  # Use "std" for Student-t
+    
+    model = ugarchfit(spec = spec, data = BTC)
+    models_bic[i,j] = infocriteria(model)[2]
+  }
+}
+
+min_indices = as.numeric(which(models_bic == min(models_bic, na.rm = TRUE), arr.ind = TRUE))
+spec = ugarchspec(
+      variance.model = list(model = "sGARCH", garchOrder = min_indices),
+      mean.model = list(armaOrder = c(0,0)),
+      distribution.model = "std")  # Use "std" for Student-t
+    
+garch_modello = ugarchfit(spec = spec, data = BTC)
+
+# Forecast volatility for 111 days
+garch_forecast = ugarchforecast(garch_modello, n.ahead = nrow(test_Ret))
+garch_volatility = sigma(garch_forecast)  # Extract forecasted volatility
+```
+
+After calculating the predicted values of Y using the GARCH model for the next periods, we can also calculate the lagged values of BTC and then add all together.
+
+```{r Plotting the result, echo=FALSE}
+final_preds = test_Ret$Bitcoin_pred + as.numeric(garch_volatility) * rnorm(length(as.numeric(garch_volatility)))
+
+# If time is already a time series, skip this line
+test_Ret$time = as.Date(row.names(test_Ret))
+test_Ret$Preds = (final_preds - mean(final_preds) + mean(test_Ret$Bitcoin))
+
+# Convert to long format for ggplot
+long_data = pivot_longer(test_Ret, cols = c(Bitcoin, Preds), 
+                          names_to = "Type", values_to = "Price")
+
+# Plot
+ggplot(long_data, aes(x = time, y = Price, color = Type)) +
+  geom_line(size = 1.2) +                             
+  labs(title = "Bitcoin vs Predictions Over Time",
+       x = "Time",
+       y = "Price",
+       color = "Legend") +                           
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20))
+```
+
+$$
+R^{BTC}_t = \beta_0' + \beta_1'R^{Gold}_{t} + \beta_2'R^{SP500}_{t} + \epsilon_t
+$$
+
+where $\epsilon_t \sim WN(0,\sigma^2_t)$ with
+
+$$
+\sigma^2_t = \omega_0 + \alpha_1\epsilon_{t-1} + \mu_1\sigma^2_{t-1}
+$$
+
+
+```{r, echo=FALSE}
+# R²
+SSE = sum((test_Ret$Bitcoin - test_Ret$Preds)^2)
+SSR = sum((test_Ret$Preds - mean(test_Ret$Bitcoin))^2)
+SSTO = SSE + SSR
+print(paste("The R² is", round(1 - (SSE / SSTO), 2)))
+
+# MSE
+residuals = test_Ret$Bitcoin - test_Ret$Preds
+MSE = mean(residuals^2)
+print(MSE)
+
+# AIC
+n = length(test_Ret$Bitcoin)
+SS_res = sum(residuals^2)
+# Number of parameters (k): The count of regression parameters + GARCH parameters
+k = 2 + 2
+AIC = n * log(SS_res / n) + 2 * k
+print(AIC)
+
+# BIC
+BIC = n * log(SS_res / n) + k * log(n)
+print(BIC)
+```
+
+
+## 3.3 Asset Prices with the Volume variable
+
+The saturated model would make sense to have the following structure
+
+$$
+Bitcoin_t = (\beta_0 + \beta_1 Oil_t + \beta_2Gold_t + \beta_3UsdEur_t + \beta_4UsdYuan_t + \beta_5SP500_t) * Z_t + \beta_6Volume_t + ...  
+$$
+
+$$
+...+ \phi_0 + \phi_1Y_{t-1} + ... + \phi_pY_{t-p} + \psi_0 + \psi_1\epsilon_t + ... + \psi_q\epsilon_{t-q}
+$$
+
+### 3.3.1. Multiple regression part
+
+```{r Split train/test, echo=FALSE}
+Assets_vol = cbind(Assets[,-7], vol) ; names(Assets_vol)[ncol(Assets_vol)] = "Volume"
+Ret_vol = returns(Assets_vol, method = "simple")
+
+train_Assets_vol = Assets_vol[1:(which(Time == "2022-12-31")),]
+test_Assets_vol = Assets_vol[which(Time == "2023-01-01"):nrow(Assets_vol),]
+
+train_Assets_clean_vol = train_Assets_vol[which(Z[1:nrow(train_Assets_vol)] == 1),]
+test_Assets_clean_vol = test_Assets_vol[which(Z[1:nrow(test_Assets_vol)] == 1),]
+
+train_Dummy = Z[1:(which(Time == "2022-12-31"))]
+test_Dummy = Z[which(Time == "2023-01-01"):nrow(Assets)]
+```
+
+
+```{r, echo=FALSE}
+M3 = cor(Assets_vol)
+corrplot(M3, method="color", col=col(200),  
+         diag = FALSE,
+         type = "lower", 
+         order = "hclust", 
+         title = "Correlation plot of Variables", 
+         addCoef.col = "black", # Add coefficient of correlation
+         mar = c(0,0,1,0)
+)
+```
+
+
+
+```{r MR model 1, echo = FALSE}
+m1 = lm(Bitcoin ~ ., data = train_Assets_clean_vol)
+
+# Checking for different assumptions
+par(mfrow = c(2,2))
+plot(mod1, pch = 16, cex = 0.5)
+
+##### Linearity #####
+# Apply powerTransform to selected non-linear variables
+lambda = powerTransform(m1)$lambda # Finding best lambda 
+
+# Apply lambda to Bitcoin price in different data frames
+train_Assets_clean_vol$transBit = train_Assets_clean_vol$Bitcoin^lambda # Creating column with the transformed BTC prices
+train_Assets_vol$transBit = train_Assets_vol$Bitcoin^lambda
+test_Assets_vol$transBit = test_Assets_vol$Bitcoin^lambda
+
+
+
+m2 = lm(transBit ~ ., data = train_Assets_clean_vol[,-which(colnames(train_Assets_clean_vol) == "Bitcoin")])
+crPlots(m2)
+
+#----- FIND PARSIMONIOUS MODEL -----# 
+
+vars = ols_step_best_subset(m2)$predictors[4] # for our computers
+# vars = ols_step_best_subset(m2)$metrics$predictors[4] # for posit
+split_vector = unlist(strsplit(vars, " "))
+formula = as.formula(paste("transBit", "~", (paste(split_vector, collapse = "+"))))
+pars_m3 = lm(formula, train_Assets_clean_vol)
+
+
+#----- Fit Final Multiple Regression Model -----#
+betas = pars_m3$coefficients
+
+# Predict Y using the fixed betas
+train_Assets_vol = as.data.frame(train_Assets_vol) %>% 
+  mutate(
+    Bitcoin_pred = betas[1] + 
+             betas[2] * Oil + 
+             betas[3] * USD_EUR + 
+             betas[4] * SP500 +
+             betas[5] * Volume
+  )
+
+# Also for the test dataset
+test_Assets_vol = as.data.frame(test_Assets_vol) %>% 
+  mutate(
+    Bitcoin_pred = betas[1] + 
+             betas[2] * Oil + 
+             betas[3] * USD_EUR + 
+             betas[4] * SP500 +
+             betas[5] * Volume
+  )
+
+# Calculate residuals
+train_Assets_vol = as.data.frame(train_Assets_vol) %>%
+  mutate(Residuals = transBit - Bitcoin_pred)
+
+test_Assets_vol = as.data.frame(test_Assets_vol) %>%
+  mutate(Residuals = transBit - Bitcoin_pred)
+```
+
+### 3.3.2. ARIMA part
+
+```{r ARIMA 1, echo = FALSE}
+par(mfrow = c(1,2))
+acf(train_Assets$Residuals, main = "ACF for BTC")
+pacf(train_Assets$Residuals, main = "PACF for BTC")
+par(mfrow = c(1,1))
+```
+
+```{r Adding lag weekends 1, echo=FALSE}
+# Add ARIMA residual predictions and GARCH variance
+BTC_lag1 = (1 - test_Dummy) * lag(test_Assets_vol$Bitcoin_pred, 1) # For the weekends
+BTC_lag1[1] = 0 # First value should be 0
+
+trans_final_predictions = test_Assets_vol$Bitcoin_pred * test_Dummy + BTC_lag1
+test_Assets_vol$Preds = trans_final_predictions^(1/lambda)
+```
+
+```{r Plotting BTC future Price with Volume - with weekends, echo=FALSE}
+# If time is already a time series, skip this line
+test_Assets_vol$time = as.Date(row.names(test_Assets_vol))
+
+# Convert to long format for ggplot
+long_data = pivot_longer(test_Assets_vol, cols = c(Bitcoin, Preds), 
+                          names_to = "Type", values_to = "Price")
+
+# Plot
+ggplot(long_data, aes(x = time, y = Price, color = Type)) +
+  geom_line(size = 1.2) +                             
+  labs(title = "Bitcoin vs Predictions Over Time",
+       x = "Time",
+       y = "Price",
+       color = "Legend") +                           
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20))
+```
+
+
+
+```{r, echo=FALSE}
+# R²
+SSE = sum(na.omit((test_Assets_vol$Bitcoin - test_Assets_vol$Preds)^2))
+SSR = sum(na.omit((test_Assets_vol$Preds - mean(test_Assets_vol$Bitcoin))^2))
+SSTO = SSE + SSR
+print(paste("The R² is", round(1 - (SSE / SSTO), 2)))
+
+# MSE
+residuals = na.omit(test_Assets_vol$Bitcoin - test_Assets_vol$Preds)
+MSE = mean(residuals^2)
+print(MSE)
+
+# AIC
+n = length(test_Assets_vol$Bitcoin)
+SS_res = sum(residuals^2)
+k = 2 + 2 # Number of parameters (k): The count of regression parameters + GARCH parameters
+AIC = n * log(SS_res / n) + 2 * k
+print(AIC)
+
+# BIC
+BIC = n * log(SS_res / n) + k * log(n)
+print(BIC)
+```
+
+$$
+Bitcoin_t = (\beta_0' + \beta_1'Oil_t + \beta_2'UsdEur_t + \beta_3'SP500_t) * Z_t + \beta_4'Volume_t + (1-Z_t)*Bitcoin_{t-1} 
+$$
+
+We want to show that our model even without the weekends can follow the actual trend of BTC price but since we lack the information during the weekends, we see this 0 values during weekends.
+
+
+## 3.4. Returns with the Volume variable
+
+```{r, echo=FALSE}
+M4 = cor(Ret_vol)
+corrplot(M4, method="color", col=col(200),  
+         diag = FALSE,
+         type = "lower", 
+         order = "hclust", 
+         title = "Correlation plot of Returns", 
+         addCoef.col = "black", # Add coefficient of correlation
+         mar = c(0,0,1,0)
+)
+```
+
+In this case, the model that we are going to examine will concern the returns of both the BTC prices and all of the Assets. Additionally to that, we will also include the ARIMA and GARCH part.
+
+The model will have the following structure
+
+$$
+R^{BTC}_t = \beta_0 + \beta_1R^{Oil}_{t} + \beta_2R^{Gold}_{t} + \beta_3R^{UsdEur}_{t} + \beta_4R^{UsdYuan}_{t} + \beta_5R^{SP500}_{t} + \beta_6R^{Volume}_{t} + ...
+$$
+
+$$
+... + \phi_0 + \phi_1R^{BTC}_{t-1} + ... + \phi_pR^{BTC}_{t-p} + \psi_0 + \psi_1\epsilon_t + ... + \psi_q\epsilon_{t-q}
+$$
+  
+The only difference is that we remove the multiplication with the Dummy variable since during weekends, the returns of the prices become 0 because the prices stay fixed for both weekend days.
+
+### 3.4.1. Fitting Multinple Regression part
+
+```{r Returns train/test 1, echo=FALSE}
+# Split Data into Training and Testing Sets for Returns
+train_Ret_vol = Ret_vol[1:(which(Time == "2022-12-31")-1),]
+test_Ret_vol = Ret_vol[which(Time == "2023-01-01"):nrow(Ret),]
+
+train_Ret_clean_vol = train_Ret_vol[which(Z[1:nrow(train_Ret_vol)] == 1),]
+test_Ret_clean_vol = test_Ret_vol[which(Z[1:nrow(test_Ret_vol)] == 1),]
+```
+
+```{r Model attempt 1, echo=FALSE}
+modello1 = lm(Bitcoin ~ ., data = train_Ret_clean[,-7])
+#summary(modello1)
+
+ols_mod = ols_step_best_subset(modello1)
+vars = ols_mod$predictors[which(min(ols_mod$aic) == ols_mod$aic)]
+
+split_vector = unlist(strsplit(vars, " "))
+formula = as.formula(paste("Bitcoin", "~", (paste(split_vector, collapse = "+"))))
+
+modello2 = lm(formula, data = train_Ret)
+#summary(modello2)
+
+
+#####===== ASSUMPTIONS =====#####
+### Homoskedasticity ###
+
+plot(modello2$residuals, type = "l")
+
+# Perform White's test for heteroskedasticity
+white_test = bptest(modello2, ~ fitted(modello2) + I(fitted(modello2)^2), data = train_Ret_vol)
+white_test # okay
+
+
+# Normality
+shapiro.test(mod2$residuals) # Not okay
+
+
+
+#####===== Adding Predictions for the weekdays from our model =====#####
+
+
+##### Fit Final Multiple Regression Model #####
+betas = modello2$coefficients
+
+# Predict Y using the fixed betas
+train_Ret_vol = as.data.frame(train_Ret_vol) %>% 
+  mutate(
+    Bitcoin_pred = betas[1] + 
+      betas[2] * Gold +
+      betas[3] * SP500
+  )
+
+# Also for the test dataset
+test_Ret_vol = as.data.frame(test_Ret_vol) %>% 
+  mutate(
+    Bitcoin_pred = betas[1] + 
+      betas[2] * Gold +
+      betas[3] * SP500
+  )
+
+
+#####===== Adding Residuals for the weekdays from our model =====#####
+
+# Calculate residuals
+train_Ret_vol = as.data.frame(train_Ret_vol) %>%
+  mutate(Residuals = Bitcoin - Bitcoin_pred)
+
+test_Ret_vol = as.data.frame(test_Ret_vol) %>%
+  mutate(Residuals = Bitcoin - Bitcoin_pred)
+```
+
+For the multiple regression part, the final model is $Bitcoin_t = \beta_0 + \beta_1Gold_t + \beta_2SP500_t$
+  
+### 3.4.2. ARIMA part
+  
+```{r, echo=FALSE}
+BTC = train_Ret$Bitcoin
+
+# Step 1: Check for stationarity
+adf_test = adf.test(BTC)  # Augmented Dickey-Fuller test
+kpss_test = kpss.test(BTC)  # KPSS test
+
+cat("ADF Test p-value: ", adf_test$p.value, "\n")
+cat("KPSS Test p-value: ", kpss_test$p.value, "\n")
+
+if (adf_test$p.value > 0.05) {
+  cat("Data is likely non-stationary (ADF test failed). Consider differencing.\n")
+} else {
+  cat("Data is stationary (ADF test passed).\n")
+}
+
+if (kpss_test$p.value < 0.05) {
+  cat("Data is likely non-stationary (KPSS test failed). Consider differencing.\n")
+} else {
+  cat("Data is stationary (KPSS test passed).\n")
+}
+
+
+# Fit ARIMA to residuals
+# Fit an ARIMA(1, 0, 1) model
+arima_model = auto.arima(train_Ret_vol$Residuals)
+
+acf(train_Ret_vol$Residuals)
+pacf(train_Ret_vol$Residuals)
+```
+
+ARIMA model is skata, so ARIMA(0,0,0)
+
+### 3.4.3. GARCH part
+
+```{r, echo=FALSE}
+# Step 4: Build the GARCH model
+n = k = 3
+models_bic = matrix(rep(0,n*k), nrow = n, ncol = k)
+for(j in 1:k){
+  for(i in 1:n){
+    x = c(i,j)
+    spec = ugarchspec(
+      variance.model = list(model = "sGARCH", garchOrder = x),
+      mean.model = list(armaOrder = c(0,0)),
+      distribution.model = "std")  # Use "std" for Student-t
+    
+    model = ugarchfit(spec = spec, data = BTC)
+    models_bic[i,j] = infocriteria(model)[2]
+  }
+}
+min_indices = as.numeric(which(models_bic == min(models_bic, na.rm = TRUE), arr.ind = TRUE))
+spec = ugarchspec(
+  variance.model = list(model = "sGARCH", garchOrder = min_indices),
+  mean.model = list(armaOrder = c(0,0)),
+  distribution.model = "std")  # Use "std" for Student-t
+
+garch_modello = ugarchfit(spec = spec, data = BTC)
+
+# Forecast volatility for 111 days
+garch_forecast = ugarchforecast(garch_modello, n.ahead = nrow(test_Ret_vol))
+garch_volatility = sigma(garch_forecast)  # Extract forecasted volatility
+```
+
+
+```{r final model 1, echo=FALSE}
+# Add ARIMA residual predictions and GARCH variance
+BTC_lag1 = (1 - test_Ret$Dummy)*lag(test_Ret$Bitcoin_pred, 1) # For the weekends
+BTC_lag1[1] = 0 # First value should be 0
+
+final_preds = test_Ret_vol$Bitcoin_pred + rnorm(length(garch_volatility))*as.numeric(garch_volatility) + BTC_lag1
+```
+
+
+```{r Plotting the result 3, echo=FALSE}
+# If time is already a time series, skip this line
+test_Ret_vol$time = as.Date(row.names(test_Ret))
+test_Ret_vol$Preds = final_preds
+
+# Convert to long format for ggplot
+long_data = pivot_longer(test_Ret_vol, cols = c(Bitcoin, Preds), 
+                         names_to = "Type", values_to = "Price")
+
+# Plot
+ggplot(long_data, aes(x = time, y = Price, color = Type)) +
+  geom_line(size = 1.2) +
+  labs(title = "Bitcoin vs Predictions Over Time",
+       x = "Time",
+       y = "Price",
+       color = "Legend") +
+  theme_minimal()    +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20))                              
+```
+
+The final model is the following:
+
+$$
+R^{BTC}_t = \beta_0 +  \beta_2R^{Gold}_{t} + \beta_5R^{SP500}_{t} + \beta_6R^{Volume}_{t} + \phi_0 + \phi_1R^{BTC}_{t-1} + ... + \phi_pR^{BTC}_{t-p} + \epsilon_t
+$$
+where $\epsilon_t \sim WN(0,\sigma_t^2)$ and
+
+$$
+\sigma^2_t = \omega_0 + \alpha_1\epsilon^2_{t-1} + \mu_1\sigma^2_{t-1}
+$$
+
+
+```{r, echo=FALSE}
+# R²
+SSE = sum((test_Ret_vol$Bitcoin - test_Ret_vol$Preds)^2)
+SSR = sum((test_Ret_vol$Preds - mean(test_Ret_vol$Bitcoin))^2)
+SSTO = SSE + SSR
+print(paste("The R² is", round(1 - (SSE / SSTO), 2)))
+
+# MSE
+residuals = test_Ret_vol$Bitcoin - test_Ret_vol$Preds
+MSE = mean(residuals^2)
+print(MSE)
+
+# AIC
+n = length(test_Assets$Bitcoin)
+SS_res = sum(residuals^2)
+# Number of parameters (k): The count of regression parameters + GARCH parameters
+k = 2 + 2
+AIC = n * log(SS_res / n) + 2 * k
+print(AIC)
+
+# BIC
+BIC = n * log(SS_res / n) + k * log(n)
+print(BIC)
+```
+
+
+
+
+-------------------------------------------------------------------------------
+
+
+\newpage
+
+
+
+
+
+
+# 4. Discriminant Analysis
+
+## 4.1. Linear Discriminant Analysis
+
+```{r, echo=FALSE}
+sum(ifelse(Ret[,1]>0, 1,0))/nrow(Ret) ; sum(ifelse(train_Ret[,1]>0, 1,0))/nrow(train_Ret) ; sum(ifelse(test_Ret[,1]>0, 1,0))/nrow(test_Ret) # How many positive returns we have for BTC
+```
+
+
+### 4.1.1. Simple LDA on Returns
+
+```{r, echo=FALSE}
+# Creating lagged variables and classification columns
+train_Ret_class = as.data.frame(train_Ret_vol) %>%
+  mutate(across(c(Oil, Gold, USD_EUR, USD_YUAN, SP500), lag, .names = "lag_{.col}"),
+         class_BTC = ifelse(Bitcoin > 0, 1, 0),
+         across(starts_with("lag_"), ~ ifelse(. > 0, 1, 0), .names = "class_{.col}"))
+
+# Adjust column names to remove unnecessary "lag_" prefix in class variables
+names(train_Ret_class) = sub("class_lag_", "class_", names(train_Ret_class))
+
+
+
+test_Ret_class = as.data.frame(test_Ret) %>%
+  mutate(across(c(Oil, Gold, USD_EUR, USD_YUAN, SP500), lag, .names = "lag_{.col}"),
+         class_BTC = ifelse(Bitcoin > 0, 1, 0),
+         across(starts_with("lag_"), ~ ifelse(. > 0, 1, 0), .names = "class_{.col}"))
+
+# Adjust column names to remove unnecessary "lag_" prefix in class variables
+names(test_Ret_class) = sub("class_lag_", "class_", names(test_Ret_class))
+
+
+# Convert class_BTC to a factor
+train_Ret_class$class_BTC = as.factor(train_Ret_class$class_BTC)
+test_Ret_class$class_BTC = as.factor(test_Ret_class$class_BTC)
+
+train_Ret_class_new = cbind(train_Ret_class$class_BTC, train_Ret_class[,2:7]) ; colnames(train_Ret_class_new)[1] = "class_BTC"
+test_Ret_class_new = cbind(test_Ret_class$class_BTC, test_Ret_class[,2:7]) ; colnames(test_Ret_class_new)[1] = "class_BTC"
+```
+
+
+```{r, echo=FALSE}
+# Fit LDA model
+lda_model = lda(class_BTC ~ Oil + Gold + USD_EUR + USD_YUAN + SP500, data = train_Ret_class)
+
+formula = as.formula(paste("class_BTC", "~", (paste(rownames(lda_model$scaling < 10)[- which(lda_model$scaling < 30)], collapse = "+"))))
+
+lda_model_reduced = lda(formula, data = train_Ret_class)
+
+# Predict using LDA
+lda_pred = predict(lda_model_reduced, newdata = test_Ret_class)
+lda_classes = lda_pred$class  # Predicted classes
+
+# Confusion matrix for LDA
+cat("LDA Confusion Matrix:\n")
+print(confusionMatrix(table(lda_classes, test_Ret_class$class_BTC)))
+```
+
+The LDA analysis gives an Accuracy = 57.24%, which is more increased compared to the prior accuracy of 53%.
+
+### 4.1.2. LDA with Cross Validation of Returns
+
+```{r, echo=FALSE}
+# Cross-validation for reduced model
+lda_cv_reduced = train(class_BTC ~ Gold + SP500, 
+                        data = train_Ret_class, method = "lda", 
+                        trControl = trainControl(method = "cv", number = 10))
+
+
+###----- CONFUSION MATRIX -----###
+conf_matrix = confusionMatrix(lda_classes, test_Ret_class$class_BTC)
+# Confusion Matrix as a heatmap
+conf_data = as.data.frame(as.table(conf_matrix$table))
+ggplot(conf_data, aes(Prediction, Reference)) +
+  geom_tile(aes(fill = Freq), color = "white") +
+  geom_text(aes(label = Freq), vjust = 1) +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  theme_minimal() +
+  labs(title = "LDA Confusion Matrix Heatmap", x = "Predicted", y = "Actual")
+
+
+###----- LDA Coefficients -----###
+lda_coefficients = as.data.frame(lda_model_reduced$scaling)  # Extract scaling coefficients
+lda_coefficients$Variables = rownames(lda_coefficients)
+
+ggplot(lda_coefficients, aes(x = reorder(Variables, LD1), y = LD1)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  coord_flip() +
+  theme_minimal() +
+  labs(title = "Variable Importance in LDA", x = "Variables", y = "Coefficient")
+
+
+###----- Balanced Accuracy -----###
+metrics = data.frame(
+  Metric = c("Accuracy", "Sensitivity (Class 0)", "Specificity (Class 1)", "Balanced Accuracy"),
+  Value = c(conf_matrix$overall["Accuracy"], conf_matrix$byClass["Sensitivity"], conf_matrix$byClass["Specificity"], (conf_matrix$byClass["Sensitivity"] + conf_matrix$byClass["Specificity"]) / 2)
+)
+ggplot(metrics, aes(x = Metric, y = Value, fill = Metric)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Model Metrics", x = "Metric", y = "Value") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_fill_brewer(palette = "Set3")
+
+
+
+###----- Calculate GINI coefficient -----###
+roc_lda = roc(test_Ret_class_new$class_BTC, lda_pred[[2]][,2])
+auc_lda = auc(roc_lda)
+gini_lda = 2 * auc_lda - 1
+print(paste("GINI for LDA:", round(gini_lda, 4)))
+```
+
+```{r, echo=FALSE}
+# Helper function to calculate F1 Score
+calculate_f1 = function(true_labels, predicted_labels) {
+  tp = sum(true_labels == 1 & predicted_labels == 1)  # True Positives
+  fp = sum(true_labels == 0 & predicted_labels == 1)  # False Positives
+  fn = sum(true_labels == 1 & predicted_labels == 0)  # False Negatives
+  
+  precision = tp / (tp + fp)
+  recall = tp / (tp + fn)
+  
+  f1 = 2 * (precision * recall) / (precision + recall)
+  return(f1)
+}
+# Calculate F1 score
+f1_lda = calculate_f1(test_Ret_class_new$class_BTC, lda_pred$class)
+print(paste("F1 Score for LDA:", round(f1_lda, 4)))
+
+
+
+library(MASS)
+# Calculate log-likelihood
+lda_actual <- as.numeric(test_Ret_class_new$class_BTC) - 1 # Convert to 0/1
+lda_predictions = lda_pred$posterior[,2]
+lda_ll <- sum(log(lda_predictions[ cbind(1:length(lda_predictions), (lda_actual + 1))]))
+
+# Number of parameters (p) = Number of coefficients + number of covariance matrix parameters
+num_features <- ncol(train_Ret_class_new) - 1
+lda_params <- num_features + num_features * (num_features + 1) / 2
+
+# BIC Calculation
+n <- nrow(test_Ret_class_new)
+lda_bic <- -2 * lda_ll + lda_params * log(n)
+print(paste("The BIC of LDA model is:", round(lda_bic,3)))
+
+```
+
+
+After the Cross Validation we ended up with a more universal Accuracy = 55.51%
+
+
+-------------------------------------------------------------------------------
+
+## 4.2. Quadratic Discriminant Analysis
+
+```{r, echo=FALSE}
+# Fit QDA model
+train_Ret_class_new = cbind(train_Ret_class[,"class_BTC"], train_Ret_class[,c(2:6)])
+colnames(train_Ret_class_new)[1] = "class_BTC"
+
+test_Ret_class_new = cbind(test_Ret_class[,"class_BTC"], test_Ret_class[,c(2:6)])
+colnames(test_Ret_class_new)[1] = "class_BTC"
+
+variables = colnames(train_Ret_class_new)[!colnames(train_Ret_class_new) %in% "class_BTC"]
+accuracy_results = NULL
+
+for (i in 1:length(variables)) {
+  # Create a formula excluding the current variable
+  formula = as.formula(paste("class_BTC ~", paste(setdiff(variables, variables[i]), collapse = " + ")))
+
+  # Fit QDA model
+  qda_model = qda(formula, data = train_Ret_class_new)
+  
+  # Predict on the test set
+  qda_pred = predict(qda_model, newdata = test_Ret_class_new)
+  
+  # Compute accuracy
+  confusion_matrix = table(Predicted = qda_pred$class, Actual = test_Ret_class_new$class_BTC)
+  accuracy = sum(diag(confusion_matrix)) / sum(confusion_matrix)
+  
+  # Store results
+  accuracy_results = rbind(accuracy_results, data.frame(Variable_Removed = variables[i], Accuracy = accuracy))
+}
+best_formula = as.formula(paste("class_BTC ~", paste(c("Gold", "SP500"), collapse = " + ")))
+best_qda = qda(best_formula, data = train_Ret_class_new)
+
+# Predict using QDA
+qda_pred = predict(best_qda, newdata = test_Ret_class_new)
+qda_classes = qda_pred$class  # Predicted classes
+```
+
+
+```{r, echo=FALSE}
+
+###----- Heatmap -----###
+qda_predictions = predict(best_qda, test_Ret_class_new)$class
+conf_matrix_qda = confusionMatrix(factor(qda_predictions), factor(test_Ret_class_new$class_BTC))
+# Confusion Matrix
+conf_data_qda = as.data.frame(as.table(conf_matrix_qda$table))
+ggplot(conf_data_qda, aes(Prediction, Reference)) +
+  geom_tile(aes(fill = Freq), color = "white") +
+  geom_text(aes(label = Freq), vjust = 1) +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  theme_minimal() +
+  labs(title = "QDA Confusion Matrix Heatmap", x = "Predicted", y = "Actual")
+
+
+###----- QDA Model Metrics -----###
+metrics_qda = data.frame(
+  Metric = c("Accuracy", "Sensitivity (Class 0)", "Specificity (Class 1)", "Balanced Accuracy"),
+  Value = c(conf_matrix_qda$overall["Accuracy"], 
+            conf_matrix_qda$byClass["Sensitivity"], 
+            conf_matrix_qda$byClass["Specificity"], 
+            (conf_matrix_qda$byClass["Sensitivity"] + conf_matrix_qda$byClass["Specificity"]) / 2)
+)
+ggplot(metrics_qda, aes(x = Metric, y = Value, fill = Metric)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "QDA Model Metrics", x = "Metric", y = "Value") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_fill_brewer(palette = "Set2")
+
+
+
+###----- ROC CURVE -----###
+library(pROC)
+
+# Compute ROC Curve for QDA
+qda_probabilities = predict(best_qda, test_Ret_class_new)$posterior[,2]
+roc_qda = roc(test_Ret_class_new$class_BTC, qda_probabilities)
+
+# Plot ROC Curve
+plot(roc_qda, col = "darkred", lwd = 2, main = "QDA ROC Curve")
+auc_qda = auc(roc_qda)
+text(0.5, 0.4, paste("AUC:", round(auc_qda, 2)), cex = 1.2)
+
+###----- Calculate GINI coefficient -----###
+gini_qda = 2 * auc_qda - 1
+print(paste("GINI for QDA:", round(gini_qda, 4)))
+
+###----- Calculate F1 score -----###
+f1_qda = calculate_f1(test_Ret_class_new$class_BTC, ifelse(qda_probabilities > 0.5, 1, 0))
+print(paste("F1 Score for QDA:", round(f1_qda, 4)))
+
+
+
+###----- Calculate BIC -----###
+
+# Calculate log-likelihood
+qda_actual <- as.numeric(test_Ret_class_new$class_BTC) - 1 # Convert to 0/1
+
+qda_probs = qda_pred$posterior[,2]
+qda_ll <- sum(log(qda_probs[cbind(1:length(qda_probs), (qda_actual + 1))]))
+
+# Number of parameters (p) = Separate covariance matrix for each class
+qda_params <- 2 * (num_features + num_features * (num_features + 1) / 2)
+
+# BIC Calculation
+qda_bic <- -2 * qda_ll + qda_params * log(n)
+print(paste("The BIC of LDA model is:", round(qda_bic,3)))
+```
+
+
+With the QDA model we get an even worse Accuracy = 58.55% compared to the prior 53%
+
+
+-------------------------------------------------------------------------------
+
+
+## 4.3. Tree and Forest models
+
+### 4.3.1. Tree model
+
+```{r, echo=FALSE}
+# Train the decision tree model
+tree_model = ctree(class_BTC ~ ., data = train_Ret_class_new)
+plot(tree_model)
+
+# Predict on test data
+tree_predictions = predict(tree_model, newdata = test_Ret_class_new)
+tree_preds = predict(tree_model, newdata = test_Ret_class_new, type = "prob")
+tree_probs = sapply(tree_preds, '[', 2)
+
+# Calculate accuracy
+accuracy = mean(tree_predictions == test_Ret_class_new$class_BTC)
+print(paste("Accuracy:", round(accuracy,2)))
+
+
+
+###----- CREATE CONFUSION MATRIX -----###
+cm_tree = confusionMatrix(as.factor(ifelse(tree_probs>0.5,1,0)), test_Ret_class_new$class_BTC)
+# Extract confusion matrix table
+cm_table = as.data.frame(cm_tree$table)
+# Plot confusion matrix as a heatmap
+ggplot(data = cm_table, aes(x = Reference, y = Prediction, fill = Freq)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), color = "white", size = 5) +
+  scale_fill_gradient(low = "blue", high = "red") +
+  labs(title = "Confusion Matrix - Decision Tree", x = "Actual", y = "Predicted") +
+  theme_minimal()
+
+
+###----- Calculate GINI coefficient -----###
+roc_tree = roc(test_Ret_class_new$class_BTC, tree_probs)
+auc_tree = auc(roc_tree)
+gini_tree = 2 * auc_tree - 1
+print(paste("GINI for Decision Tree:", round(gini_tree, 4)))
+
+
+
+###----- Calculate F1 score -----###
+# Calculate F1 score
+f1_tree = calculate_f1(test_Ret_class_new$class_BTC, ifelse(tree_probs>0.5, 1,0))
+print(paste("F1 Score for Decision Tree:", round(f1_tree, 4)))
+
+```
+
+-----
+
+### 4.3.2. Random Forest Model
+
+```{r Random Forest, echo = FALSE}
+# Train Random Forest model
+rf_model = randomForest(class_BTC ~ ., 
+                         data = train_Ret_class_new, 
+                         importance = TRUE)
+# Make predictions on the test dataset
+rf_probs = predict(rf_model, newdata = test_Ret_class_new, type = "prob")[,2]
+
+
+# Plot error rate as a function of the number of trees
+plot(rf_model, main = "Error Rate by Number of Trees")
+
+
+
+# Calculate Feature Importance
+importance_rf = importance(rf_model)
+varImpPlot(rf_model, main = "Feature Importance - Random Forest")
+
+
+# Generate Confusion Matrix
+rf_predictions = predict(rf_model, test_Ret_class_new)
+cm = confusionMatrix(rf_predictions, test_Ret_class_new$class_BTC)
+
+# Convert confusion matrix to data frame
+cm_table = as.data.frame(cm$table)
+
+# Plot confusion matrix heatmap
+ggplot(data = cm_table, aes(x = Reference, y = Prediction, fill = Freq)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), color = "white", size = 5) +
+  scale_fill_gradient(low = "blue", high = "red") +
+  labs(title = "Confusion Matrix Heatmap - Random Forest", x = "Actual", y = "Predicted")
+
+
+install.packages("rpart.plot")
+library(rpart)
+
+# Extract and visualize a single tree
+single_tree = randomForest::getTree(rf_model, k = 1, labelVar = TRUE)
+tree_model = rpart(class_BTC ~ ., data = train_Ret_class_new, method = "class")
+# Visualize the tree
+rpart.plot(tree_model, main = "Decision Tree Visualization")
+
+
+library(randomForest)
+
+# Fit a Random Forest model (example)
+rf_model <- randomForest(class_BTC ~ ., data = train_Ret_class_new, ntree = 500)
+
+# Extract the last tree using getTree() function
+# k = length(rf_model$forest$ndbigtree) accesses the last tree
+last_tree <- getTree(rf_model, k = length(rf_model$forest$ndbigtree), labelVar = TRUE)
+
+# Plot the tree (Basic Plot)
+library(rpart)
+plot(last_tree)
+text(last_tree, use.n = TRUE)
+
+
+
+###----- GINI coefficient -----###
+# Calculate ROC and AUC
+roc_rf = roc(test_Ret_class_new$class_BTC, rf_probs)
+auc_rf = auc(roc_rf)
+gini_rf = 2 * auc_rf - 1
+print(paste("GINI for Random Forest:", round(gini_rf, 4)))
+
+
+###----- F1 SCORE -----###
+f1_rf = calculate_f1(test_Ret_class_new$class_BTC, ifelse(rf_probs>0.5,1,0))
+print(paste("F1 Score for Random Forest:", round(f1_rf, 4)))
+
+
+###----- MSE -----###
+rf_predictions <- predict(rf_model, test_Ret_class_new, type = "response")
+rf_predicted_classes <- as.numeric(rf_predictions) - 1
+
+print(paste("The MSE for the Random Forest is:", round(mean(as.numeric(rf_predictions) - (as.numeric(test_Ret_class_new$class_BTC)-1)^2), 3)))
+```
+
+
+-------------------------------------------------------------------------------
+
+
+## 4.4. Neural Network
+
+```{r Neural Networks, echo = FALSE}
+weekdays = train_Ret_class_new[-sort(c(seq(3,nrow(train_Ret_class_new), 7), seq(4,nrow(train_Ret_class_new), 7))),]
+
+# Let's fit a neural network on the training dataset. 
+nn = neuralnet(class_BTC ~ .,
+                 data = weekdays[,c(1:3, 6)],
+               hidden = c(3,2),
+               act.fct = "logistic",
+               err.fct = 'ce',
+               linear.output = FALSE,
+               lifesign = "minimal"
+               )
+# Plot the neural network 
+plot(nn)
+
+# Make predictions whether the price will go up or down
+nn_probs = predict(nn, newdata = test_Ret_class_new)
+preds = ifelse(nn_probs > 0.5, 1, 0)[,2]
+
+print(confusionMatrix(table(preds, test_Ret_class_new$class_BTC)))
+
+
+###----- F1 SCORE -----###
+true_classes <- as.numeric(test_Ret_class_new$class_BTC)
+confusion_nn <- table(Predicted = preds, Actual = true_classes)
+
+# Extract values
+TP <- confusion_nn[2, 2] ; FP <- confusion_nn[2, 1] ; FN <- confusion_nn[1, 2]
+
+# Calculate Precision, Recall, and F1 Score
+precision <- TP / (TP + FP) ; recall <- TP / (TP + FN)
+f1_score <- 2 * (precision * recall) / (precision + recall)
+
+print(paste("The F1 score of the NN is:", round(f1_score,3)))
+
+
+###----- MSE -----###
+mse_nn = mean((preds - true_classes)^2)
+print(paste("The MSE of the NN is:", round(mse_nn,3)))
+
+
+###----- GINI -----###
+print(paste("The GINI coefficient is equal to:", round(2 * auc(roc(test_Ret_class_new$class_BTC, preds)) - 1, 3)))
+```
+
+-------------------------------------------------------------------------------
+
+# 5. Predictions' Analysis
+
+### 5.1. Simulations for Return and DA methods
+
+```{r Simulations 2, echo=FALSE}
+# lda_classes ; qda_classes 
+tree_classes = ifelse(tree_probs>0.5,1,0) ; rf_classes = ifelse(rf_probs>0.5,1,0)
+nn_classes = ifelse(nn_probs[,2]>0.5, 1,0)
+# Ensure classes is a matrix
+classes <- as.matrix(cbind(lda_classes, qda_classes, tree_classes, rf_classes, nn_classes))
+
+# Parameters
+N <- 1000
+initial_capital <- 1000000
+investment_ratio <- 0.01
+
+# Initialize list to store results for each model
+total_capitals <- vector("list", ncol(classes))
+
+# Simulate capital movement for each model
+for (l in 1:ncol(classes)) { # Loop through models
+  model_results <- matrix(0, nrow = N, ncol = nrow(test_Ret)) # Each model's N simulations
+  for (j in 1:N) {           # Perform N simulations
+    K <- initial_capital     # Starting capital
+    for (i in 1:nrow(test_Ret)) { # Iterate over test data
+      inv <- investment_ratio * K
+      if (classes[i, l] > 0.5) {
+        K <- K + test_Ret$Bitcoin[i] * inv
+      } else {
+        K <- K - test_Ret$Bitcoin[i] * inv
+      }
+      model_results[j, i] <- K # Record capital after each step
+    }
+  }
+  total_capitals[[l]] <- as.data.frame(model_results) # Convert to data frame for clarity
+}
+# Assign names to the list for each model
+names(total_capitals) <- c("LDA", "QDA", "Tree", "Random_Forest", "Neural_Network")
+
+
+
+# Calculate average final capital and standard deviation
+model_performance <- data.frame(
+  Model = names(total_capitals),
+  Avg_Final_Capital = sapply(final_capitals, mean)
+)
+# Sort by average final capital
+model_performance <- model_performance[order(-model_performance$Avg_Final_Capital), ]
+knitr::kable(model_performance)
+
+
+
+# Plot average capital evolution for all models
+
+par(mfrow = c(2, 3))
+for (model in names(total_capitals)) {
+  avg_capital <- colMeans(total_capitals[[model]]) # Average capital at each step
+  plot(avg_capital, type = "l", main = paste("Avg. Capital Growth -", model),
+       xlab = "Time Steps", ylab = "Capital", col = "darkcyan", lwd = 2, ylim = c(1000000, 1025000))
+}
+par(mfrow = c(1, 1)) # Reset plot layout
+```
+

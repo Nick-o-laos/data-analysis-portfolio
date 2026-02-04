@@ -1,0 +1,317 @@
+---
+title: "Βιοστατιστική ΙΙ"
+subtitle: "Ανάλυση Επιβίωσης σε ασθενείς με καρκίνο του παγκρέατος"
+author:
+  - "Κριτούλη Στυλιανή"
+  - "Γκίκα Χριστίνα"
+  - "Ηλιοπούλου Ελένη"
+  - "Ομαδικη συμβολή σε όλα τα μέρη της εργασίας"
+date: "`r Sys.Date()`"
+toc: TRUE
+lang: el
+mainfont: Times New Roman
+fontsize: 11pt
+geometry: a4paper
+output:
+   pdf_document:
+      latex_engine: xelatex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\newpage
+
+# 1. Εισαγωγή
+
+Η εν λόγω εργασία πραγματοποιείται στα πλαίσια του μαθήματος *Βιοστατιστική ΙΙ*, μάθημα του τμήματος Στατιστικής του Οικονομικού Πανεπιστημίου Αθηνών. 
+
+## 1.1. Στόχος
+
+Το σετ δεδομένων στο οποίο έγινε η παρακάτω ανάλυση προέρχεται από μια προοπτική μελέτη φάσης ΙΙ σε 30 ασθενείς με μέτριο έως σοβαρό πόνο από καρκίνο του παγκρέατος και που μερικοί εξ αυτών υποβλήθηκαν σε θεραπεία με βραχεία παρηγορητική ακτινοθεραπεία 24Gy σε τρεις θεραπείες, μία φορά την εβδομάδα, μεταξύ 2015-2018. Το κύριο ερευνητικό ερώτημα που καλείται να εκτιμηθεί είναι η επίδραση της βραχείας παρηγορητικής ακτινοθεραπείας στη συνολική επιβίωση (OS) σε ασθενείς με πόνο που σχετίζεται με τον καρκίνο του παγκρέατος.
+
+Πρωταρχικός στόχος αυτής της ανάλυσης είναι η εξέταση πιθανών συσχετίσεων μεταξύ των δοθέντων μεταβλητών, και κατ'επέκταση η δημιουργία μοντέλων που να εξηγούν διάφορες συμπεριφορές μεταξύ των μεταβλητών και των αλληλεπιδράσεών τους.
+
+## 1.2. Περιγραφή των δεδομένων
+
+Τα δεδομένα περιέχουν παρατηρήσεις που αφορούν κυρίως την σωματική κατάσταση του ασθενή πριν την θεραπεία και την απόδοση της ακτινοθεραπείας στο προσδόκιμο ζωής τους. Πιο συγκεκριμένα, υπάρχουν μετρήσεις όπως η ηλικία, το ύψος, το βάρος, το επίπεδο πόνου κ.α. που πολύ πιθανό να επηρεάζουν κατά κάποιο τρόπο το αποτέλεσμα της μελέτης. Υπάρχουν επίσης ημερολογιακοί δείκτες, δηλαδή ημερομηνίες που σηματοδοτούν πότε ο ασθενής διαγνώσθηκε με καρκίνο, πότε ξεκίνησε η ακτινοθεραπεία καθώς και την ημέρα που ο ασθενής απεβίωσε. 
+
+Υπό μια στατιστική οπτική, οφείλουμε πριν ξεκινήσουμε την ανάλυση να κάνουμε μερικές διορθώσεις στα δεδομένα, έτσι ώστε η μελέτη να καταστεί πιο βατή.
+
+
+## 1.3. Data Manipulation
+
+Το μόνο κομμάτι που χρειάζεται να αναφερθεί σε αυτό το σημείο είναι πως οι μεταβλητές που περιέχουν ημερομηνίες θα πρέπει να είναι σε κατάλληλη μορφή. Επιπλέον, δημιουργούμε μια νέα μεταβλητή που ονομάζεται *Survival_time* και ορίζεται ως η ημερομηνία θανάτου του ασθενή μείον την ημερομηνία της διάγνωσης. Το σύστημα αναγνωρίζει την μορφή των ημερομηνιών και επιστρέφει κάποιους αριθμούς που αντιστοιχούν στις μέρες που ο ασθενής επέζησε από την ημέρα της διάγνωσης.
+
+```{r Data manipulation, echo=FALSE, include=FALSE, warning=FALSE}
+# Load necessary libraries
+library(survival) ; library(survminer)
+
+# Read the data
+file = "C:\\Users/nicko\\Downloads\\Casestudy2_Data_Pancreas.csv"
+data = read.csv(file, stringsAsFactors = TRUE)
+
+# Inspect the structure and summary of the data
+str(data) ; summary(data)
+
+# Converting factor to character and then to Date
+data$Date_diagnosis = as.Date(as.character(data$Date_diagnosis), format = "%d/%m/%Y")
+data$datum_dead = as.Date(as.character(data$datum_dead), format = "%d/%m/%Y")
+
+# Calculate survival time (in days) as the difference between date_diagnosis and datum_dead
+data$Survival_time = as.numeric(data$datum_dead - data$Date_diagnosis)
+
+# Handle censored data (Event == 0 indicates censored)
+# If Event == 0 and datum_dead is NA, assume survival time is up to the end of the study.
+end_of_study = max(data$datum_dead, na.rm = TRUE)
+data$Survival_time[is.na(data$Survival_time) & data$Event == 0] = as.numeric(end_of_study - data$Date_diagnosis[is.na(data$Survival_time) & data$Event == 0])
+```
+
+\newpage
+
+# 2. Περιγραφική Στατιστική
+
+Με την ανάλυση της περιγραφικής Στατιστικής μπορούμε να πάρουμε μια πρώτη εικόνα για τα χαρακτηριστικά των δεδομένων μας. Πρώτο κομμάτι που θα εξετάσουμε είναι οι συνεχείς μεταβλητές, και τα στατιστικά μεγέθη που έχουν ενδιαφέρον, φαίνονται στο παρακάτω πινακάκι. 
+
+```{r descriptive stats, echo=FALSE, warning=FALSE, message=FALSE, results='asis'}
+library(psych) ; library(kableExtra) ; library(dplyr)
+# Summary of the calculated survival times
+knitr::kable(round(describe(data[,c(2,4:7,14)]),2)[,-c(1,2)], booktabs = TRUE) %>% kable_styling(font_size = 8, latex_options = c("hold_position", "position"), position = "center")
+```
+
+Όπως φαίνεται, χάρη σε αυτήν την ανάλυση μπορούμε να επισημάνουμε μερικά σημαντικά, αλλά και ενδιαφέροντα στοιχεία που θα πρέπει να έχουμε υπόψιν μας για την συνέχεια της ανάλυσης. 
+
+Για παράδειγμα, παρατηρούμε ότι για το:
+
+- **Survival_time**: Η μέση διάρκεια επιβίωσης είναι 416.14 μονάδες με πολύ υψηλή τυπική απόκλιση (465.04), γεγονός που υποδηλώνει μεγάλη μεταβλητότητα στα δεδομένα. Η μεγάλη διαφορά μεταξύ μέσης τιμής και διάμεσου (247.5) δείχνει ότι η κατανομή είναι θετικά λοξή, με ορισμένες περιπτώσεις να έχουν πολύ μεγαλύτερη επιβίωση.
+
+- **Age_at_consultation**: Η μέση ηλικία των ασθενών είναι 64.79 έτη, με σχετικά μικρή τυπική απόκλιση (11.13). Η διάμεσος (62.5) είναι κοντά στη μέση τιμή, γεγονός που υποδηλώνει μια συμμετρική κατανομή.
+
+- **NRS_WorstPain_at_consultation**: Η μέση τιμή του χειρότερου πόνου είναι 7.96, με σχετικά μικρή τυπική απόκλιση (1.37). Αυτό δείχνει ότι οι περισσότεροι ασθενείς αντιμετωπίζουν υψηλό επίπεδο πόνου.
+
+- **Performance_status_at_consultation**: Η μέση τιμή της κατάστασης απόδοσης είναι 1.29, με διάμεσο 1.0. Αυτό υποδηλώνει ότι οι περισσότεροι ασθενείς έχουν μια καλή κατάσταση απόδοσης.
+
+- **Weight_at_consultation** και **Length_at_consultation**: Τα δεδομένα για το βάρος και το ύψος δείχνουν μια συμμετρική κατανομή, με μέσες τιμές κοντά στις διάμεσες τιμές.
+
+Οι κατηγορικές μεταβλητές που έχουν ένα ενδιαφέρον ως προς την κατανομή τους, φαίνονται στο παράρτημα  [βλ. Σχήμα 3]
+
+\newpage
+
+# 3. Kaplan-Meier Ανάλυση στην Ακτινοθεραπεία
+
+Στο πρώτο κομμάτι της εργασίας αξίζει να γίνει η ανάλυση Kaplan-Meier (εφεξής KM). Ο σκοπός αυτής της ανάλυσης είναι αφενός η αξιολόγηση κι αφετέρου η οπτικοποίηση των πιθανοτήτων επιβίωσης με την πάροδο του χρόνου για ασθενείς σε διαφορετικές ομάδες (π.χ. εκείνοι που έλαβαν ακτινοθεραπεία έναντι εκείνων που δεν έλαβαν).
+
+## 3.1. Αποτελέσματα γραφήματος
+
+Από το γράφημα παρακάτω παρατηρούμε ότι οι ασθενείς που υπεβλήθησαν σε ακτινοθεραπεία (εφεξής RT2) έχουν κατά μέσο όρο μεγαλύτερο προσδόκημο ζωής συγκριτικά με αυτούς που δεν δέχθηκαν την θεραπεία (εφεξής RT1). Βέβαια, ο συνολικός αριθμός των ατόμων RT2 ήταν τριπλάσιος από την RT1 και πιο συγκεκριμένα αρκετά μικρός (αθροιστικά 28) για να μπορούμε να πούμε με σιγουριά ότι υπάρχει εμφανής και στατιστικά σημαντική διαφορά μεταξύ των δύο υποομάδων. Αυτό φυσικά μπορούμε να το εξετάσουμε και στην συνέχεια με κατάλληλους στατιστικούς ελέγχους καθώς και από το p-value που φαίνεται να είναι 0.39, συνεπώς μη σημαντικό.
+
+Ένα επίσης ενδιαφέρον στοιχείο που παρατηρούμε στο γράφημα είναι ότι ο τελευταίος θανών στην ομάδα RT1 ήταν 798 ημέρες ενώ στην ομάδα RT2 ήταν 1856 ημέρες δηλαδή σχεδόν 2.5 φορές περισσότερο. Αυτό δίνει μια ελπίδα ότι ίσως η ακτινοθεραπεία να έχει θετική επίδραση στο προσδόκημο ζωής μετά την θεραπεία.
+
+```{r km_plot, fig.cap="Kaplan-Meier διάγραμμα επιβίωσης: Επίδραση RT", echo=FALSE, fig.align='center', out.width='85%'}
+# Visualize survival times based on RT using Kaplan-Meier
+km_fit = survfit(Surv(Survival_time, Event) ~ RT, data = data)
+# Adjust font sizes directly to 75% of the default (e.g., default ~12, so we use ~9)
+ggsurvplot(
+  km_fit, 
+  data = data, 
+  pval = TRUE, 
+  conf.int = TRUE, 
+  risk.table = TRUE, 
+  xlab = "Time (days)", 
+  ylab = "Survival Probability", 
+  legend.title = "Radiotherapy",
+  ggtheme = theme_minimal() +
+    theme(
+      plot.title = element_text(size = 9),          # Adjust title font size
+      axis.title.x = element_text(size = 9),        # Adjust x-axis label font size
+      axis.title.y = element_text(size = 9),        # Adjust y-axis label font size
+      axis.text.x = element_text(size = 9),         # Adjust x-axis tick font size
+      axis.text.y = element_text(size = 9),         # Adjust y-axis tick font size
+      legend.title = element_text(size = 9),        # Adjust legend title font size
+      legend.text = element_text(size = 9),         # Adjust legend text font size
+      strip.text = element_text(size = 9)           # Adjust facet strip font size (if applicable)
+    ),
+  risk.table.fontsize = 3                            # Reduce font size in the risk table
+)
+```
+
+Μια επιπλέον ανάλυση που θα μπορούσαμε να κάνουμε εντός της ενότητας του KM, είναι η ίδια ανάλυση, όμως λαμβάνοντας υπόψιν τις μεταβλητές φύλο και επίδοση (θα φανεί παρακάτω γιατί επιλέχθησαν αυτές οι μεταβλητές).
+
+Τα αποτελέσματα της ανάλυσης KM ανά φύλο φαίνονται γραφικά στο παράρτημα (βλ. Σχήμα 4). Η γραφική παράσταση επιβίωσης συγκρίνει τις πιθανότητες επιβίωσης με την πάροδο του χρόνου ανά φύλο που υποβάλλονται σε ακτινοθεραπεία. Οι καμπύλες επιβίωσης, μαζί με τα διαστήματα εμπιστοσύνης τους, δείχνουν ελάχιστες διαφορές μεταξύ των φύλων, με το τεστ log-rank να έχει p-value ίσο με 0,74, υποδηλώνοντας ότι δεν υπάρχει στατιστικά σημαντική διαφορά στην επιβίωση. Ο πίνακας κάτω από την γραφική παράσταση συνοψίζει τους συμμετέχοντες που παραμένουν σε κάθε ομάδα σε διαφορετικά χρονικά σημεία.
+
+Τα αποτελέσματα της ανάλυσης KM ανά επίδοση φαίνονται γραφικά στο παράρτημα (βλ. Σχήμα 5). Αυτή η γραφική παράσταση επιβίωσης απεικονίζει τις πιθανότητες επιβίωσης με την πάροδο του χρόνου με βάση την κατάσταση απόδοσης κατά τη επίσκεψη (0, 1 ή 2). Ενώ οι καμπύλες επιβίωσης υποδηλώνουν διαφορές μεταξύ των ομάδων, ιδιαίτερα με την κατάσταση απόδοσης 0 να έχει τη μικρότερη επιβίωση, με το τεστ log-rank να έχει p-value ίσο με 0,16, υποδεικνύοντας ότι δεν υπάρχουν στατιστικά σημαντικές διαφορές στην επιβίωση μεταξύ των καταστάσεων απόδοσης. Ο πίνακας κάτω από την γραφική παράσταση παρέχει λεπτομέρειες για τους συμμετέχοντες που παραμένουν σε κάθε ομάδα σε συγκεκριμένα χρονικά σημεία.
+
+## 3.2. Στατιστικός Έλεγχος για την KM ανάλυση
+
+Για να ελέγξουμε εάν υπάρχει στατιστική διαφορά ανάμεσα στα δύο γκρουπ μπορούμε να χρησιμοποιήσουμε το log-rank τεστ. Αυτό το τεστ log-rank χρησιμοποιείται για τη σύγκριση των κατανομών επιβίωσης δύο ή περισσότερων ομάδων. Ελέγχει τη μηδενική υπόθεση (Η0) ότι δεν υπάρχει στατιστική διαφορά στην επιβίωση μεταξύ των ομάδων (δηλαδή, οι καμπύλες επιβίωσής τους είναι πανομοιότυπες) έναντι της εναλλακτικής υπόθεσης (Η1) ότι υπάρχει στατιστική διαφορά στην επιβίωση μεταξύ των ομάδων.
+
+Όμως, η δοκιμή log-rank προϋποθέτει ότι η αναλογία κινδύνου μεταξύ των ομάδων είναι σταθερή με την πάροδο του χρόνου. Εάν αυτή η υπόθεση δεν ισχύει, τα αποτελέσματα της δοκιμής μπορεί να είναι παραπλανητικά. Επίσης, εάν το μέγεθος του δείγματος είναι μικρό, το τεστ μπορεί να μην έχει επαρκή ισχύ για να ανιχνεύσει μια πραγματική διαφορά στην επιβίωση. Άρα καταλαβαίνει κανείς ότι αυτός ο έλεγχος είναι ένα βασικό πρώτο βήμα για τη σύγκριση της επιβίωσης, αλλά θα πρέπει να συμπληρωθεί με άλλες αναλύσεις (π.χ. παλινδρόμηση Cox) για προσαρμογή για πιθανούς συγχυτικούς παράγοντες.
+
+Το αποτέλεσμα της ανάλυσης μας δίνει p-value ίσο με 0.4 το οποίο είναι μεγαλύτερο από το 0.05. Συνεπώς δεν υπάρχουν αρκετές ενδείξεις ότι η Η0 μπορεί να απορριφθεί, άρα δεν υπάρχει στατιστική διαφορά στην επιβίωση μεταξύ των ομάδων.
+
+```{r log-rank test, echo=FALSE}
+# Log-rank test for differences between groups
+log_rank_test = survdiff(Surv(Survival_time, Event) ~ RT, data = data)
+# print(log_rank_test)
+```
+
+
+# 4. Cox Proportional Hazards Μοντέλο
+
+Το μοντέλο Cox Proportional Hazards (εφεξής CPH) είναι ένα ευρέως χρησιμοποιούμενο μοντέλο παλινδρόμησης στην ανάλυση επιβίωσης, ιδιαίτερα χρήσιμο κατά την αξιολόγηση της σχέσης μεταξύ του χρόνου επιβίωσης των ατόμων και μιας ή περισσότερων μεταβλητών απόκρισης.
+
+Για την ορθή μοντελοποίηση του CPH, θα πρέπει να αφαιρέσουμε εκ των προτέρων μερικές μεταβλητές από το πλήρες μοντέλο. Ο λόγος που γίνεται αυτό είναι επειδή δεν έχουν όλες οι δοθέντες μεταβλητές την ίδια κλινική συσχέτιση με το θέμα ως αποτέλεσμα να δημιουργηθεί πρόβλημα πολυσυγγραμμικότητας. Επίσης αυτό που θέλουμε να πετύχουμε εν τέλει είναι ένα μοντέλο που να μπορεί να κάνει καλές προβλέψεις με όσο το δυνατόν λιγότερες μεταβλητές γίνεται (parsimony). Συνεπώς η ανάλυση θα ξεκινήσει με τις 5 εξής μεταβλητές: *RT* , *Age_at_consultation*, *Performance_status_at_consultation*, *NRS_WorstPain_at_consultation*, *Weight_at_consultation*
+
+Από τα αποτελέσματα του μοντέλου παρατηρούμε πως δύο εξ αυτών των μεταβλητών είναι πιο στατιστικά σημαντικές, η ηλικία ( *Age_at_consultation* ) και η απόδοση ( *Performance_status_at_consultation* ).
+
+Δυστυχώς όμως ακόμη και αυτές οι μεταβλητές δεν θεωρούνται στατιστικά σημαντικές για επίπεδο σημαντικότητας α = 0.05, αλλά για α = 0.14. Αυτό σημαίνει πως δεν μπορούμε να είμαστε πολύ σίγουροι πως, για παράδειγμα, η ηλικία έχει επίδραση στον χρόνο επιβίωσης.
+
+```{r cox proportional hazard model, fig.cap="Cox Proportional Hazard Μοντέλο", echo=FALSE, fig.align='center', out.width='85%', message=FALSE}
+library(MASS)
+# Function to perform advanced Cox regression analysis with variable selection
+cox_variable_selection = function(data, time_col, event_col, covariates) {
+  # Create the survival object
+  surv_obj = Surv(data[[time_col]], data[[event_col]])
+
+  # Step 1: Fit the full Cox model
+  full_model = coxph(surv_obj ~ ., data = data[covariates])
+  # Step 2: Perform variable selection using stepwise AIC
+  step_model = stepAIC(full_model, direction = "both", trace = FALSE)
+  # Step 3: Fit the final reduced model
+  final_model = coxph(formula(step_model), data = data)
+return(final_model)
+}
+
+# Usage Example
+# Define input variables
+time_col = "Survival_time"
+event_col = "Event"
+covariates = c("RT", "Age_at_consultation", "Performance_status_at_consultation", 
+                "NRS_WorstPain_at_consultation", "Weight_at_consultation")
+
+# Run the algorithm on the dataset
+cox_model = cox_variable_selection(data, time_col, event_col, covariates)
+# Visualize the Cox model results
+cox_plot = ggforest(cox_model, data = data, 
+                     main = "Hazard Ratios for Cox Proportional Hazards Model", 
+                     cpositions = c(0.02, 0.22, 0.4))
+print(cox_plot)
+```
+
+Επίσης, αξίζει να αναφερθεί ένα σχόλιο για το παραπάνω διάγραμμα. Μπορούμε να δούμε ότι για τις 28 αυτές μεταβλητές, οι εκτιμητές των 2 μεταβλητών είναι 0.97 για την ηλικία και 2.13 για την επίδοση. Αυτό που θέλουμε επίσης να δούμε είναι στα διαστήματα εμπιστοσύνης να μην περιέχεται το 1, καθώς αυτό σημαίνει ότι η κάθε μεταβλητή είναι τελείως ασυσχέτιστη με το την μεταβλητή απόκρισης. Άρα παρατηρούμε πως η ηλικία έχει αρνητική επίδραση αφού είναι μικρότερη από 1 και το Δ.Ε. της περιέχει οριακά την τιμή 1, ενώ για την επίδοση παρατηρούμε ότι φαίνεται να είναι αρκετά μακρυά από το 1, αλλά το Δ.Ε. της εμπεριέχει την τιμή 1.
+
+\newpage
+
+# 5. Παράρτημα
+
+```{r, fig.cap="Κατανομές κατηγορικών δεδομένων", echo=FALSE, fig.align='center', out.width="75%"}
+# Set up the plotting area with proper margins and spacing
+par(mfrow = c(2, 2), mar = c(3, 3, 3, 3))  # Adjust margins for better spacing
+
+# Define custom colors for each pie chart
+gender_colors <- c("lightblue", "pink")
+event_colors <- c("skyblue", "salmon")
+meds_colors <- c("red", "green")
+rt_colors <- c("gold", "lightgreen", "coral")
+
+# Create larger pie charts with improved spacing and label positioning
+pie(
+  table(data$Gender),
+  col = gender_colors,
+  main = "Gender Distribution",
+  cex.main = 1.5,  # Increase the title size
+  cex = 1.2,       # Increase label size
+  labels = paste(names(table(data$Gender)), "\n(", table(data$Gender), ")", sep = "")
+)
+
+pie(
+  table(data$Event),
+  col = event_colors,
+  main = "Event Distribution",
+  cex.main = 1.5,
+  cex = 1.2,
+  labels = paste(names(table(data$Event)), "\n(", table(data$Event), ")", sep = "")
+)
+
+pie(
+  table(data$meds),
+  col = meds_colors,
+  main = "Medication Usage",
+  cex.main = 1.5,
+  cex = 1.2,
+  labels = paste(names(table(data$meds)), "\n(", table(data$meds), ")", sep = "")
+)
+
+pie(
+  table(data$RT),
+  col = rt_colors,
+  main = "Radiotherapy Usage",
+  cex.main = 1.5,
+  cex = 1.2,
+  labels = paste(names(table(data$RT)), "\n(", table(data$RT), ")", sep = "")
+)
+
+# Reset plotting layout
+par(mfrow = c(1, 1))
+
+```
+
+
+```{r KM model by gender, fig.cap="KM Μοντέλο ανά Φύλο", echo=FALSE, fig.align='center', out.width="75%"}
+
+km_fit_gender = survfit(Surv(Survival_time, Event) ~ Gender, data = data)
+
+ggsurvplot(
+  km_fit_gender, 
+  data = data, 
+  pval = TRUE, 
+  conf.int = TRUE, 
+  risk.table = TRUE,
+  xlab = "Time (days)", 
+  ylab = "Survival Probability", 
+  legend.title = "Radiotherapy",
+  ggtheme = theme_minimal() +
+    theme(
+      plot.title = element_text(size = 9),         
+      axis.title.x = element_text(size = 9),        
+      axis.title.y = element_text(size = 9),       
+      axis.text.x = element_text(size = 9),        
+      axis.text.y = element_text(size = 9),       
+      legend.title = element_text(size = 9),    
+      legend.text = element_text(size = 9),    
+      strip.text = element_text(size = 9)         
+    ),
+  risk.table.fontsize = 3                        
+)
+```
+
+
+```{r KM model by performance, fig.cap="KM Μοντέλο ανά Έπίδοση", echo=FALSE, fig.align='center', out.width="75%"}
+
+km_fit_perf = survfit(Surv(Survival_time, Event) ~ Performance_status_at_consultation, data = data)
+
+ggsurvplot(
+  km_fit_perf, 
+  data = data, 
+  pval = TRUE, 
+  conf.int = TRUE, 
+  risk.table = TRUE,
+  xlab = "Time (days)", 
+  ylab = "Survival Probability", 
+  legend.title = "Radiotherapy",
+  ggtheme = theme_minimal() +
+    theme(
+      plot.title = element_text(size = 9), 
+      axis.title.x = element_text(size = 9),     
+      axis.title.y = element_text(size = 9),   
+      axis.text.x = element_text(size = 9),       
+      axis.text.y = element_text(size = 9),        
+      legend.title = element_text(size = 9),   
+      legend.text = element_text(size = 9),         
+      strip.text = element_text(size = 9)         
+    ),
+  risk.table.fontsize = 3                        
+)
+```
+
