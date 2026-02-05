@@ -1,38 +1,46 @@
-﻿
 # Data Analysis Portfolio
 
 Welcome to my data analysis portfolio! I'm a Statistics postgraduate specializing in advanced data analysis with R, Python, and statistical modeling.
 
 ## 📚 Featured Projects
 
-### [Motodynamiki Car Rental Analysis](/motodynamiki-analysis/)
-**Advanced statistical analysis of 5,000+ car rental records**
-- Objective: Identify customer characteristics for on-desk service purchases
-- Techniques: EDA, regression modeling, bootstrap imputation
-- Tools: R, RMarkdown, statistical inference
-- Outcome: Model explaining 40% of revenue variance with actionable insights
+### [Financial Analysis of US Mutual Funds](financial-analysis-us-funds/)
+**Comprehensive analysis of 90 US mutual funds (1963-2019)**
+- **Objective**: Evaluate fund performance metrics and portfolio construction strategies
+- **Techniques**: Sharpe/Treynor/Sortino ratios, Jensen's alpha, GARCH modeling, portfolio optimization
+- **Tools**: R, time series analysis, regression modeling, financial econometrics
+- **Outcome**: Identification of effective performance metrics and portfolio strategies validated out-of-sample
+- **Files**: Complete R code, 12-page technical report, statistical analysis
+
+### [Car Rentals Data Analysis](Car%20Rentals%20Data%20Analysis/)
+**Advanced statistical analysis of 5,000+ car rental records for Motodynamiki**
+- **Objective**: Identify customer characteristics influencing on-desk service purchases
+- **Techniques**: EDA, regression modeling, bootstrap imputation, correlation analysis
+- **Tools**: R, RMarkdown, statistical inference
+- **Outcome**: Regression model explaining 40% of revenue variance with actionable marketing insights
+- **Files**: Complete R code, 6-page report, presentation slides
 
 *(More projects will be added here)*
 
 ## 🛠️ Technical Skills
-- **Languages**: R, Python, SQL
-- **Statistical Methods**: Regression analysis, hypothesis testing, EDA, time series
+- **Statistical Analysis**: Regression, time series, hypothesis testing, financial econometrics
+- **Programming**: R, Python, SQL
+- **Financial Modeling**: Portfolio optimization, risk assessment, performance metrics
 - **Data Visualization**: ggplot2, Plotly, Tableau
 - **Tools**: Git, RMarkdown, Jupyter, Docker
-- **Domains**: Business analytics, marketing analytics, predictive modeling
+- **Domains**: Financial analytics, business intelligence, predictive modeling
 
-## 📊 Project Structure
+## 📁 Project Structure
 Each project includes:
-- Complete analysis code
-- Detailed report
-- Presentation
-- Clean documentation
+- **Complete Analysis Code** (reproducible RMarkdown)
+- **Detailed Technical Report** (methodology and findings)
+- **Clean Documentation** (project overview and setup)
 
 ## 📫 Contact
-- GitHub: [yourusername](https://github.com/yourusername)
-- LinkedIn: [Your Profile](https://linkedin.com/in/yourprofile)
-- Email: your.email@example.com
+- **GitHub**: [nick-o-laos](https://github.com/nick-o-laos)
+- **LinkedIn**: [Your Profile](https://linkedin.com/in/yourprofile) *(update this)*
+- **Email**: your.email@example.com *(update this)*
 
 ---
 
-*Portfolio last updated: [Current Date]*
+*Portfolio created with GitHub Pages • Last updated: [Current Date]*
