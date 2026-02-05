@@ -4,7 +4,7 @@ Welcome to my data analysis portfolio! I'm a Statistics postgraduate specializin
 
 ## 📚 Featured Projects
 
-### [Greek Super League Analysis 2013-2014](https://github.com/Nick-o-laos/data-analysis-portfolio/tree/9846f339001d586f22c7f3ff8c307c2e6a855a71/Portfolio/Football%20Analytics%20on%20Super%20League%202013-2014)
+### [[Greek Super League Analysis 2013-2014](https://github.com/Nick-o-laos/data-analysis-portfolio/tree/9846f339001d586f22c7f3ff8c307c2e6a855a71/Portfolio/Football%20Analytics%20on%20Super%20League%202013-2014)](https://github.com/Nick-o-laos/data-analysis-portfolio/tree/9846f339001d586f22c7f3ff8c307c2e6a855a71/Portfolio/Football%20Analytics%20on%20Super%20League%202013-2014)
 **Comprehensive analysis of football match results and betting odds**
 - **Objective**: Analyze match statistics, betting odds correlations, and build predictive models for bookmaker odds
 - **Techniques**: Descriptive statistics, correlation analysis, linear regression, logistic regression, multicollinearity diagnosis (VIF), assumption testing
