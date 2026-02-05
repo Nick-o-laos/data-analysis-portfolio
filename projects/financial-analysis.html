@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Financial Analysis on USD Funds</title>
+    <meta charset="UTF-8">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; margin-top: 30px; }
+        .project-info { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+            margin: 20px 0;
+        }
+        .file-card {
+            background: white;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .file-icon { font-size: 24px; margin-right: 10px; }
+        .file-title { 
+            font-size: 18px; 
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .file-desc { 
+            color: #666; 
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        .btn {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #2980b9;
+            text-decoration: none;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #3498db;
+            color: #3498db;
+        }
+        .btn-outline:hover {
+            background: #3498db;
+            color: white;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #7f8c8d;
+        }
+        .back-link:hover {
+            background: #e9ecef;
+        }
+        .tag {
+            display: inline-block;
+            background: #ecf0f1;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Financial Analysis on USD Funds (1963-2019)</h1>
+    
+    <div class="project-info">
+        <p><strong>📊 Objective:</strong> Comprehensive analysis of 90 US mutual funds spanning 56 years to evaluate performance metrics and portfolio construction strategies.</p>
+        <p><strong>🔧 Techniques:</strong> Sharpe/Treynor/Sortino ratios, Jensen's alpha, GARCH modeling, portfolio optimization, time series analysis</p>
+        <p><strong>🛠️ Tools:</strong> R, financial econometrics, regression modeling, statistical inference</p>
+        
+        <div style="margin-top: 15px;">
+            <span class="tag">Time Series Analysis</span>
+            <span class="tag">Portfolio Optimization</span>
+            <span class="tag">Risk Metrics</span>
+            <span class="tag">Financial Econometrics</span>
+            <span class="tag">R Programming</span>
+        </div>
+    </div>
+    
+    <h2>📁 Project Files</h2>
+    
+    <div class="file-card">
+        <div class="file-title"><span class="file-icon">📄</span> Complete Technical Report</div>
+        <div class="file-desc">12-page detailed report with methodology, analysis, and conclusions</div>
+        <a class="btn" href="files/Financial-Analysis-Report.pdf" target="_blank">View PDF</a>
+        <a class="btn btn-outline" href="files/Financial-Analysis-Report.pdf" download>Download PDF</a>
+    </div>
+    
+    <div class="file-card">
+        <div class="file-title"><span class="file-icon">📊</span> Interactive Analysis Dashboard</div>
+        <div class="file-desc">HTML report with interactive visualizations and filterable data</div>
+        <a class="btn" href="files/Financial-Analysis-Dashboard.html" target="_blank">Open Dashboard</a>
+    </div>
+    
+    <div class="file-card">
+        <div class="file-title"><span class="file-icon">💻</span> Complete R Code</div>
+        <div class="file-desc">Reproducible RMarkdown file with all analysis code</div>
+        <a class="btn" href="files/Financial-Analysis-Code.Rmd" target="_blank">View Code</a>
+        <a class="btn btn-outline" href="files/Financial-Analysis-Code.Rmd" download>Download Rmd</a>
+    </div>
+    
+    <div class="file-card">
+        <div class="file-title"><span class="file-icon">📈</span> Performance Metrics Dataset</div>
+        <div class="file-desc">Cleaned dataset with calculated performance metrics for all 90 funds</div>
+        <a class="btn" href="files/Fund-Performance-Metrics.csv" target="_blank">View CSV</a>
+        <a class="btn btn-outline" href="files/Fund-Performance-Metrics.csv" download>Download Dataset</a>
+    </div>
+    
+    <h2>🎯 Key Findings</h2>
+    <ul>
+        <li>Identified most effective performance metrics for fund evaluation</li>
+        <li>Developed optimized portfolio strategies validated out-of-sample</li>
+        <li>Analyzed risk-return trade-offs across different market conditions</li>
+        <li>Created reproducible methodology for fund performance assessment</li>
+    </ul>
+    
+    <a class="back-link" href="/">← Back to Portfolio</a>
+</body>
+</html>
