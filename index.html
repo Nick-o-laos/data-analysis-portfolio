@@ -1,54 +1,603 @@
-# Data Analysis Portfolio
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Analysis Portfolio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+        }
+        
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        /* Main Content Styles */
+        main {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            margin-bottom: 40px;
+        }
+        
+        section {
+            margin-bottom: 50px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        h2 i {
+            color: #3498db;
+        }
+        
+        /* Project Cards */
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .project-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid #e1e4e8;
+            position: relative;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border-color: #3498db;
+        }
+        
+        .project-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 20px;
+        }
+        
+        .project-header h3 {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+        
+        .project-header a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .project-header a:hover {
+            color: #f1c40f;
+            text-decoration: underline;
+        }
+        
+        .project-content {
+            padding: 25px;
+        }
+        
+        .project-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 15px 0;
+        }
+        
+        .tag {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .project-features {
+            list-style: none;
+            margin-top: 15px;
+        }
+        
+        .project-features li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            position: relative;
+            padding-left: 25px;
+        }
+        
+        .project-features li:before {
+            content: "✓";
+            color: #2ecc71;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
+        /* Skills Section */
+        .skills-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .skill-category {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .skill-category h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .skill-list {
+            list-style: none;
+        }
+        
+        .skill-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .skill-list li i {
+            color: #3498db;
+            width: 20px;
+        }
+        
+        /* Contact Section */
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+        
+        .contact-item {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            min-width: 200px;
+            transition: all 0.3s ease;
+        }
+        
+        .contact-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .contact-item i {
+            font-size: 2.5rem;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+        
+        .contact-item a {
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        
+        .contact-item a:hover {
+            color: #3498db;
+            text-decoration: underline;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            border-top: 1px solid #eee;
+            margin-top: 40px;
+        }
+        
+        .update-date {
+            font-style: italic;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            header {
+                padding: 40px 0;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            main {
+                padding: 20px;
+            }
+            
+            .project-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .skills-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .project-card, .skill-category, .contact-item {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        /* Project Structure */
+        .structure-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .structure-item {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .structure-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .structure-icon {
+            font-size: 2rem;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+        
+        .structure-item h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Data Analysis Portfolio</h1>
+            <p class="subtitle">Statistics Postgraduate | Advanced Data Analyst | R & Python Specialist</p>
+            <p>Welcome to my data analysis portfolio! I'm a Statistics postgraduate specializing in advanced data analysis with R, Python, and statistical modeling.</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <main>
+            <!-- Featured Projects Section -->
+            <section id="projects">
+                <h2><i class="fas fa-star"></i> Featured Projects</h2>
+                
+                <div class="project-grid">
+                    <!-- Greek Super League Project -->
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h3><a href="projects/greek-super-league.html">Greek Super League Analysis 2013-2014</a></h3>
+                            <p><i class="fas fa-futbol"></i> Sports Analytics</p>
+                        </div>
+                        <div class="project-content">
+                            <p><strong>Comprehensive analysis of football match results and betting odds</strong></p>
+                            <div class="project-tags">
+                                <span class="tag">R Programming</span>
+                                <span class="tag">Regression</span>
+                                <span class="tag">Data Visualization</span>
+                                <span class="tag">Sports Analytics</span>
+                            </div>
+                            <ul class="project-features">
+                                <li><strong>Objective:</strong> Analyze match statistics, betting odds correlations, and build predictive models</li>
+                                <li><strong>Techniques:</strong> Descriptive statistics, correlation analysis, linear & logistic regression</li>
+                                <li><strong>Tools:</strong> R, ggplot2, corrplot, psych, car, lmtest, RMarkdown</li>
+                                <li><strong>Key Findings:</strong> Home team advantage confirmed, strong correlation among bookmaker odds</li>
+                                <li><strong>Special Features:</strong> Animated standings board showing weekly team progression</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Financial Analysis Project -->
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h3><a href="projects/financial-analysis.html">Financial Analysis on USD Funds</a></h3>
+                            <p><i class="fas fa-chart-line"></i> Financial Analytics</p>
+                        </div>
+                        <div class="project-content">
+                            <p><strong>Analysis of 90 US mutual funds (1963-2019)</strong></p>
+                            <div class="project-tags">
+                                <span class="tag">Financial Modeling</span>
+                                <span class="tag">Time Series</span>
+                                <span class="tag">Portfolio Optimization</span>
+                                <span class="tag">GARCH</span>
+                            </div>
+                            <ul class="project-features">
+                                <li><strong>Objective:</strong> Evaluate fund performance metrics and portfolio construction strategies</li>
+                                <li><strong>Techniques:</strong> Sharpe/Treynor/Sortino ratios, Jensen's alpha, GARCH modeling</li>
+                                <li><strong>Tools:</strong> R, time series analysis, regression modeling, financial econometrics</li>
+                                <li><strong>Outcome:</strong> Effective performance metrics and portfolio strategies validated out-of-sample</li>
+                                <li><strong>Files:</strong> Complete R code, 12-page technical report, statistical analysis</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Car Rentals Project -->
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h3><a href="projects/car-rentals.html">Car Rentals Data Analysis</a></h3>
+                            <p><i class="fas fa-car"></i> Business Intelligence</p>
+                        </div>
+                        <div class="project-content">
+                            <p><strong>Advanced statistical analysis of 5,000+ car rental records for Motodynamiki</strong></p>
+                            <div class="project-tags">
+                                <span class="tag">EDA</span>
+                                <span class="tag">Regression</span>
+                                <span class="tag">Business Analytics</span>
+                                <span class="tag">Customer Insights</span>
+                            </div>
+                            <ul class="project-features">
+                                <li><strong>Objective:</strong> Identify customer characteristics influencing on-desk service purchases</li>
+                                <li><strong>Techniques:</strong> EDA, regression modeling, bootstrap imputation, correlation analysis</li>
+                                <li><strong>Tools:</strong> R, RMarkdown, statistical inference</li>
+                                <li><strong>Outcome:</strong> Regression model explaining 40% of revenue variance with actionable marketing insights</li>
+                                <li><strong>Files:</strong> Complete R code, 6-page report, presentation slides</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                    <p><i class="fas fa-plus-circle"></i> <em>More projects will be added here</em></p>
+                </div>
+            </section>
+            
+            <!-- Technical Skills Section -->
+            <section id="skills">
+                <h2><i class="fas fa-tools"></i> Technical Skills</h2>
+                
+                <div class="skills-container">
+                    <div class="skill-category">
+                        <h3>Statistical Analysis</h3>
+                        <ul class="skill-list">
+                            <li><i class="fas fa-chart-bar"></i> Regression Analysis</li>
+                            <li><i class="fas fa-wave-square"></i> Time Series Analysis</li>
+                            <li><i class="fas fa-check-circle"></i> Hypothesis Testing</li>
+                            <li><i class="fas fa-money-bill-wave"></i> Financial Econometrics</li>
+                            <li><i class="fas fa-futbol"></i> Sports Analytics</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="skill-category">
+                        <h3>Programming & Tools</h3>
+                        <ul class="skill-list">
+                            <li><i class="fab fa-r-project"></i> R Programming</li>
+                            <li><i class="fab fa-python"></i> Python</li>
+                            <li><i class="fas fa-database"></i> SQL</li>
+                            <li><i class="fab fa-git-alt"></i> Git</li>
+                            <li><i class="fas fa-docker"></i> Docker</li>
+                            <li><i class="fas fa-shield-alt"></i> Shiny Apps</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="skill-category">
+                        <h3>Data Visualization</h3>
+                        <ul class="skill-list">
+                            <li><i class="fas fa-chart-line"></i> ggplot2</li>
+                            <li><i class="fas fa-chart-pie"></i> Plotly</li>
+                            <li><i class="fas fa-tachometer-alt"></i> Tableau</li>
+                            <li><i class="fas fa-project-diagram"></i> corrplot</li>
+                            <li><i class="fas fa-map"></i> Interactive Dashboards</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="skill-category">
+                        <h3>Domain Expertise</h3>
+                        <ul class="skill-list">
+                            <li><i class="fas fa-chart-line"></i> Financial Analytics</li>
+                            <li><i class="fas fa-briefcase"></i> Business Intelligence</li>
+                            <li><i class="fas fa-brain"></i> Predictive Modeling</li>
+                            <li><i class="fas fa-futbol"></i> Sports Analytics</li>
+                            <li><i class="fas fa-users"></i> Customer Analytics</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Project Structure Section -->
+            <section id="structure">
+                <h2><i class="fas fa-folder-open"></i> Project Structure</h2>
+                <p>Each project in my portfolio includes comprehensive documentation and reproducible analysis:</p>
+                
+                <div class="structure-grid">
+                    <div class="structure-item">
+                        <div class="structure-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <h4>Complete Analysis Code</h4>
+                        <p>Reproducible RMarkdown files with all analysis code and comments</p>
+                    </div>
+                    
+                    <div class="structure-item">
+                        <div class="structure-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <h4>Detailed Technical Report</h4>
+                        <p>Comprehensive methodology, findings, and conclusions in PDF format</p>
+                    </div>
+                    
+                    <div class="structure-item">
+                        <div class="structure-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h4>Clean Documentation</h4>
+                        <p>Project overview, setup instructions, and technical specifications</p>
+                    </div>
+                    
+                    <div class="structure-item">
+                        <div class="structure-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h4>Interactive Visualizations</h4>
+                        <p>Static and interactive plots, dashboards, and data visualizations</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Contact Section -->
+            <section id="contact">
+                <h2><i class="fas fa-envelope"></i> Contact</h2>
+                
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fab fa-github"></i>
+                        <h3>GitHub</h3>
+                        <p><a href="https://github.com/nick-o-laos" target="_blank">github.com/nick-o-laos</a></p>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="fab fa-linkedin"></i>
+                        <h3>LinkedIn</h3>
+                        <p><a href="https://linkedin.com/in/yourprofile" target="_blank">linkedin.com/in/yourprofile</a></p>
+                        <small><em>(Update this link)</em></small>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <h3>Email</h3>
+                        <p><a href="mailto:your.email@example.com">your.email@example.com</a></p>
+                        <small><em>(Update this email)</em></small>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>Portfolio created with GitHub Pages • Designed for clarity and professionalism</p>
+            <p class="update-date">Last updated: <span id="currentDate"></span></p>
+        </footer>
+    </div>
 
-Welcome to my data analysis portfolio! I'm a Statistics postgraduate specializing in advanced data analysis with R, Python, and statistical modeling.
-
-## 📚 Featured Projects
-### [Greek Super League Analysis 2013-2014](projects/greek-super-league.html)
-**Comprehensive analysis of football match results and betting odds**
-- **Objective**: Analyze match statistics, betting odds correlations, and build predictive models for bookmaker odds
-- **Techniques**: Descriptive statistics, correlation analysis, linear regression, logistic regression, multicollinearity diagnosis (VIF), assumption testing
-- **Tools**: R, ggplot2, corrplot, psych, car, lmtest, RMarkdown
-- **Key Findings**: Home team advantage confirmed, strong correlation among bookmaker odds, challenges in predicting odds from match outcomes
-- **Files**: Complete R code, 17-page technical report, animated standings visualization, HTML output
-- **Special Features**: Animated standings board showing weekly team progression
-
-### [Financial Analysis on USD funds](projects/financial-analysis.html)
-- **Objective**: Evaluate fund performance metrics and portfolio construction strategies
-- **Techniques**: Sharpe/Treynor/Sortino ratios, Jensen's alpha, GARCH modeling, portfolio optimization
-- **Tools**: R, time series analysis, regression modeling, financial econometrics
-- **Outcome**: Identification of effective performance metrics and portfolio strategies validated out-of-sample
-- **Files**: Complete R code, 12-page technical report, statistical analysis
-
-### [Car Rentals Data Analysis](projects/car-rentals.html)
-**Advanced statistical analysis of 5,000+ car rental records for Motodynamiki**
-- **Objective**: Identify customer characteristics influencing on-desk service purchases
-- **Techniques**: EDA, regression modeling, bootstrap imputation, correlation analysis
-- **Tools**: R, RMarkdown, statistical inference
-- **Outcome**: Regression model explaining 40% of revenue variance with actionable marketing insights
-- **Files**: Complete R code, 6-page report, presentation slides
-
-*(More projects will be added here)*
-
-## 🛠️ Technical Skills
-- **Statistical Analysis**: Regression, time series, hypothesis testing, financial econometrics, sports analytics
-- **Programming**: R, Python, SQL
-- **Financial Modeling**: Portfolio optimization, risk assessment, performance metrics
-- **Data Visualization**: ggplot2, Plotly, Tableau, corrplot
-- **Tools**: Git, RMarkdown, Jupyter, Docker, Shiny
-- **Domains**: Financial analytics, business intelligence, predictive modeling, sports analytics
-
-## 📁 Project Structure
-Each project includes:
-- **Complete Analysis Code** (reproducible RMarkdown)
-- **Detailed Technical Report** (methodology and findings)
-- **Clean Documentation** (project overview and setup)
-- **Visualizations** (interactive or static)
-
-## 📫 Contact
-- **GitHub**: [nick-o-laos](https://github.com/nick-o-laos)
-- **LinkedIn**: [Your Profile](https://linkedin.com/in/yourprofile) *(update this)*
-- **Email**: your.email@example.com *(update this)*
-
----
-
-*Portfolio created with GitHub Pages • Last updated: [Current Date]*
+    <script>
+        // Set current date
+        const currentDate = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('currentDate').textContent = currentDate.toLocaleDateString('en-US', options);
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if(targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 20,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Add animation on scroll
+        const observerOptions = {
+            threshold: 0.1
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Observe project cards for animation
+        document.querySelectorAll('.project-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
