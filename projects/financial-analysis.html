@@ -11,144 +11,206 @@
             margin: 0 auto;
             line-height: 1.6;
             color: #333;
+            background: #f8f9fa;
         }
-        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
-        h2 { color: #34495e; margin-top: 30px; }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        h1 { 
+            color: #27ae60; 
+            border-bottom: 3px solid #2ecc71;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        h2 { 
+            color: #0a2e5c; 
+            margin-top: 35px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e1e4e8;
+        }
         .project-info { 
-            background: #f8f9fa; 
-            padding: 20px; 
-            border-radius: 8px;
-            border-left: 5px solid #3498db;
-            margin: 20px 0;
+            background: linear-gradient(135deg, #d4edda, #d1ecf1);
+            padding: 25px; 
+            border-radius: 10px;
+            border-left: 6px solid #27ae60;
+            margin: 25px 0;
         }
         .file-card {
             background: white;
-            border: 1px solid #e1e4e8;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 15px 0;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
+            border: 2px solid #e1e4e8;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            transition: all 0.3s ease;
         }
         .file-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: #27ae60;
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.15);
+            transform: translateY(-3px);
         }
-        .file-icon { font-size: 24px; margin-right: 10px; }
+        .file-icon { 
+            font-size: 28px; 
+            margin-right: 15px;
+            float: left;
+        }
+        .file-content {
+            margin-left: 45px;
+        }
         .file-title { 
-            font-size: 18px; 
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 8px;
+            font-size: 20px; 
+            font-weight: 700;
+            color: #27ae60;
+            margin-bottom: 5px;
         }
         .file-desc { 
             color: #666; 
-            font-size: 14px;
-            margin-bottom: 12px;
+            font-size: 15px;
+            margin-bottom: 15px;
         }
         .btn {
             display: inline-block;
-            background: #3498db;
+            background: linear-gradient(135deg, #27ae60, #219653);
             color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 12px 25px;
+            border-radius: 8px;
             text-decoration: none;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
+            font-weight: 600;
             margin-right: 10px;
-            transition: background 0.3s;
+            margin-top: 5px;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 8px rgba(39, 174, 96, 0.2);
         }
         .btn:hover {
-            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(39, 174, 96, 0.3);
             text-decoration: none;
-        }
-        .btn-outline {
-            background: transparent;
-            border: 2px solid #3498db;
-            color: #3498db;
-        }
-        .btn-outline:hover {
-            background: #3498db;
-            color: white;
         }
         .back-link {
             display: inline-block;
-            margin-top: 30px;
-            padding: 10px 20px;
-            background: #f8f9fa;
-            border-radius: 5px;
+            margin-top: 40px;
+            padding: 12px 25px;
+            background: #f1f8ff;
+            border-radius: 8px;
             text-decoration: none;
-            color: #7f8c8d;
+            color: #27ae60;
+            font-weight: 600;
+            border: 2px solid #27ae60;
+            transition: all 0.3s ease;
         }
         .back-link:hover {
-            background: #e9ecef;
+            background: #27ae60;
+            color: white;
+            text-decoration: none;
+        }
+        .coming-soon {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            color: #856404;
+            margin-top: 10px;
         }
         .tag {
             display: inline-block;
-            background: #ecf0f1;
-            padding: 4px 10px;
+            background: #d4edda;
+            color: #155724;
+            padding: 6px 15px;
             border-radius: 20px;
-            font-size: 12px;
-            margin-right: 5px;
-            margin-bottom: 5px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #c3e6cb;
         }
     </style>
 </head>
 <body>
-    <h1>Financial Analysis on USD Funds (1963-2019)</h1>
-    
-    <div class="project-info">
-        <p><strong>📊 Objective:</strong> Comprehensive analysis of 90 US mutual funds spanning 56 years to evaluate performance metrics and portfolio construction strategies.</p>
-        <p><strong>🔧 Techniques:</strong> Sharpe/Treynor/Sortino ratios, Jensen's alpha, GARCH modeling, portfolio optimization, time series analysis</p>
-        <p><strong>🛠️ Tools:</strong> R, financial econometrics, regression modeling, statistical inference</p>
+    <div class="container">
+        <h1>📈 Financial Analysis on USD Funds (1963-2019)</h1>
         
-        <div style="margin-top: 15px;">
-            <span class="tag">Time Series Analysis</span>
-            <span class="tag">Portfolio Optimization</span>
-            <span class="tag">Risk Metrics</span>
-            <span class="tag">Financial Econometrics</span>
-            <span class="tag">R Programming</span>
+        <div class="project-info">
+            <p><strong>🎯 Objective:</strong> Comprehensive analysis of 90 US mutual funds spanning 56 years to evaluate performance metrics and portfolio construction strategies.</p>
+            <p><strong>📊 Techniques:</strong> Sharpe/Treynor/Sortino ratios, Jensen's alpha, GARCH modeling, portfolio optimization, time series analysis</p>
+            <p><strong>🛠️ Tools:</strong> R, financial econometrics, regression modeling, statistical inference</p>
+            
+            <div style="margin-top: 20px;">
+                <span class="tag">Financial Modeling</span>
+                <span class="tag">Portfolio Optimization</span>
+                <span class="tag">Time Series Analysis</span>
+                <span class="tag">Risk Assessment</span>
+                <span class="tag">Performance Metrics</span>
+            </div>
         </div>
+        
+        <h2>📂 Project Files</h2>
+        
+        <div class="file-card">
+            <span class="file-icon">📄</span>
+            <div class="file-content">
+                <div class="file-title">Complete Technical Report</div>
+                <div class="file-desc">12-page detailed report with methodology, analysis, and conclusions.</div>
+                <div class="coming-soon">
+                    ⏳ Report file coming soon. Currently being finalized.
+                </div>
+            </div>
+        </div>
+        
+        <div class="file-card">
+            <span class="file-icon">📊</span>
+            <div class="file-content">
+                <div class="file-title">Interactive Analysis Dashboard</div>
+                <div class="file-desc">HTML report with interactive visualizations and filterable data.</div>
+                <div class="coming-soon">
+                    ⏳ Dashboard coming soon. Currently in development.
+                </div>
+            </div>
+        </div>
+        
+        <div class="file-card">
+            <span class="file-icon">💻</span>
+            <div class="file-content">
+                <div class="file-title">Complete R Code</div>
+                <div class="file-desc">Reproducible RMarkdown file with all analysis code.</div>
+                <div class="coming-soon">
+                    ⏳ R code coming soon. Currently being documented.
+                </div>
+            </div>
+        </div>
+        
+        <div class="file-card">
+            <span class="file-icon">📈</span>
+            <div class="file-content">
+                <div class="file-title">Performance Metrics Dataset</div>
+                <div class="file-desc">Cleaned dataset with calculated performance metrics for all 90 funds.</div>
+                <div class="coming-soon">
+                    ⏳ Dataset coming soon. Currently being processed.
+                </div>
+            </div>
+        </div>
+        
+        <h2>🎯 Key Findings</h2>
+        <ul style="background: #f1f8ff; padding: 20px 40px; border-radius: 8px;">
+            <li>Identified most effective performance metrics for fund evaluation</li>
+            <li>Developed optimized portfolio strategies validated out-of-sample</li>
+            <li>Analyzed risk-return trade-offs across different market conditions</li>
+            <li>Created reproducible methodology for fund performance assessment</li>
+            <li>Compared traditional vs. alternative performance measurement approaches</li>
+        </ul>
+        
+        <h2>🔧 Analysis Components</h2>
+        <ul>
+            <li><strong>Performance Ratios:</strong> Sharpe, Treynor, Sortino ratios calculated for all funds</li>
+            <li><strong>Risk Modeling:</strong> GARCH models for volatility estimation</li>
+            <li><strong>Alpha Analysis:</strong> Jensen's alpha to measure risk-adjusted returns</li>
+            <li><strong>Portfolio Optimization:</strong> Efficient frontier and optimal portfolio construction</li>
+            <li><strong>Time Series Analysis:</strong> Long-term performance trends and cycles</li>
+        </ul>
+        
+        <a class="back-link" href="../">← Back to Portfolio</a>
     </div>
-    
-    <h2>📁 Project Files</h2>
-    
-    <div class="file-card">
-        <div class="file-title"><span class="file-icon">📄</span> Complete Technical Report</div>
-        <div class="file-desc">12-page detailed report with methodology, analysis, and conclusions</div>
-        <a class="btn" href="files/Financial-Analysis-Report.pdf" target="_blank">View PDF</a>
-        <a class="btn btn-outline" href="files/Financial-Analysis-Report.pdf" download>Download PDF</a>
-    </div>
-    
-    <div class="file-card">
-        <div class="file-title"><span class="file-icon">📊</span> Interactive Analysis Dashboard</div>
-        <div class="file-desc">HTML report with interactive visualizations and filterable data</div>
-        <a class="btn" href="files/Financial-Analysis-Dashboard.html" target="_blank">Open Dashboard</a>
-    </div>
-    
-    <div class="file-card">
-        <div class="file-title"><span class="file-icon">💻</span> Complete R Code</div>
-        <div class="file-desc">Reproducible RMarkdown file with all analysis code</div>
-        <a class="btn" href="files/Financial-Analysis-Code.Rmd" target="_blank">View Code</a>
-        <a class="btn btn-outline" href="files/Financial-Analysis-Code.Rmd" download>Download Rmd</a>
-    </div>
-    
-    <div class="file-card">
-        <div class="file-title"><span class="file-icon">📈</span> Performance Metrics Dataset</div>
-        <div class="file-desc">Cleaned dataset with calculated performance metrics for all 90 funds</div>
-        <a class="btn" href="files/Fund-Performance-Metrics.csv" target="_blank">View CSV</a>
-        <a class="btn btn-outline" href="files/Fund-Performance-Metrics.csv" download>Download Dataset</a>
-    </div>
-    
-    <h2>🎯 Key Findings</h2>
-    <ul>
-        <li>Identified most effective performance metrics for fund evaluation</li>
-        <li>Developed optimized portfolio strategies validated out-of-sample</li>
-        <li>Analyzed risk-return trade-offs across different market conditions</li>
-        <li>Created reproducible methodology for fund performance assessment</li>
-    </ul>
-    
-    <a class="back-link" href="/">← Back to Portfolio</a>
 </body>
 </html>
