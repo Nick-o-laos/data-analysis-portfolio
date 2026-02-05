@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Car Rentals Data Analysis</title>
+    <meta charset="UTF-8">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 { color: #2c3e50; border-bottom: 3px solid #e74c3c; padding-bottom: 10px; }
+        h2 { color: #34495e; margin-top: 30px; }
+        .project-info { 
+            background: #fff5f5; 
+            padding: 20px; 
+            border-radius: 8px;
+            border-left: 5px solid #e74c3c;
+            margin: 20px 0;
+        }
+        .file-card {
+            background: white;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .file-icon { font-size: 24px; margin-right: 10px; }
+        .file-title { 
+            font-size: 18px; 
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .file-desc { 
+            color: #666; 
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        .btn {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #c0392b;
+            text-decoration: none;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #e74c3c;
+            color: #e74c3c;
+        }
+        .btn-outline:hover {
+            background: #e74c3c;
+            color: white;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #7f8c8d;
+        }
+        .back-link:hover {
+            background: #e9ecef;
+        }
+        .tag {
+            display: inline-block;
+            background: #ffefec;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            color: #e74c3c;
+        }
+        .insight-box {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+        .insight-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Car Rentals Data Analysis for Motodynamiki</h1>
+    
+    <div class="project-info">
+        <p><strong>🚗 Objective:</strong> Advanced statistical analysis of 5,000+ car rental records to identify customer characteristics influencing on-desk service purchases and optimize revenue.</p>
+        <p><strong>📊 Techniques:</strong> Exploratory Data Analysis (EDA), regression modeling, bootstrap imputation, correlation analysis, hypothesis testing</p>
+        <p><strong>🛠️ Tools:</strong> R, RMarkdown, statistical inference, data visualization</p>
+        
+        <div style="margin-top: 15px;">
+            <span class="tag">Customer Analytics</span>
+            <span class="tag">Regression Modeling</span>
+            <span class="tag">Business Intelligence</span>
+            <span class="tag">Revenue Optimization</span>
+            <span class="tag">Data Visualization</span>
+        </div>
+    </div>
+    
+    <h2>📁 Project Files</h2>
+    
+    <div class="file-card">
+        <div class="file-title"><span class="file-icon">📄</span> Complete Analysis Report</div>
+        <div class="file-desc">6-page detailed report with methodology, findings, and business recommendations</div>
+        <a class="btn" href="files/Car-Rentals-Report.pdf" target="_blank">View PDF</a>
+        <a class="btn btn-outline" href="files/Car-Rentals-Report.pdf" download>Download PDF</a>
+    </div>
+    
+    <div class="file-card">
+        <div class="file-title"><span class="file-icon">📊</span> Presentation Slides</div>
+        <div class="file-desc">Executive presentation summarizing key insights for business stakeholders</div>
+        <a class="btn" href="files/Car-Rentals-Presentation.pdf" target="_blank">View Slides</a>
+        <a class="btn btn-outline" href="files/Car-Rentals-Presentation.pdf" download>Download PDF</a>
+    </div>
+    
+    <div class="file-card">
+        <div class="file-title"><span class="file-icon">💻</span> R Analysis Code</div>
+        <div class="file-desc">Complete RMarkdown file with all statistical analysis and visualizations</div>
+        <a class="btn" href="files/Car-Rentals-Code.Rmd" target="_blank">View Code</a>
+        <a class="btn btn-outline" href="files/Car-Rentals-Code.Rmd" download>Download Rmd</a>
+    </div>
+    
+    <div class="file-card">
+        <div class="file-title"><span class="file-icon">📈</span> Interactive Dashboard</div>
+        <div class="file-desc">Shiny dashboard for exploring rental patterns and customer segments</div>
+        <a class="btn" href="files/Car-Rentals-Dashboard.html" target="_blank">Open Dashboard</a>
+    </div>
+    
+    <h2>🔍 Key Insights</h2>
+    
+    <div class="insight-box">
+        <div class="insight-title">Revenue Model Performance</div>
+        <p>Regression model explaining 40% of revenue variance with actionable marketing insights.</p>
+    </div>
+    
+    <div class="insight-box">
+        <div class="insight-title">Customer Segmentation</div>
+        <p>Identified 4 distinct customer segments with different service purchase behaviors.</p>
+    </div>
+    
+    <div class="insight-box">
+        <div class="insight-title">Optimal Pricing Strategy</div>
+        <p>Recommended pricing adjustments expected to increase add-on service revenue by 15%.</p>
+    </div>
+    
+    <div class="insight-box">
+        <div class="insight-title">Seasonal Patterns</div>
+        <p>Discovered significant seasonal variations in service purchases with peak periods identified.</p>
+    </div>
+    
+    <h2>🎯 Business Impact</h2>
+    <ul>
+        <li>Provided data-driven recommendations for targeted marketing campaigns</li>
+        <li>Identified high-value customer segments for personalized service offerings</li>
+        <li>Developed predictive model for service purchase likelihood</li>
+        <li>Created dashboard for ongoing performance monitoring</li>
+    </ul>
+    
+    <a class="back-link" href="/">← Back to Portfolio</a>
+</body>
+</html>
