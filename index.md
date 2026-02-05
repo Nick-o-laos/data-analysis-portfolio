@@ -13,15 +13,14 @@ Welcome to my data analysis portfolio! I'm a Statistics postgraduate specializin
 - **Files**: Complete R code, 17-page technical report, animated standings visualization, HTML output
 - **Special Features**: Animated standings board showing weekly team progression
 
-### [Financial Analysis on USD funds](https://github.com/Nick-o-laos/data-analysis-portfolio/tree/990d34014a91fcba264016680f8cc034b78b638f/Portfolio/Financial%20Analysis%20on%20USD%20funds)
-**Comprehensive analysis of 90 US mutual funds (1963-2019)**
+### [Financial Analysis on USD funds](/projects/financial-analysis.html)**
 - **Objective**: Evaluate fund performance metrics and portfolio construction strategies
 - **Techniques**: Sharpe/Treynor/Sortino ratios, Jensen's alpha, GARCH modeling, portfolio optimization
 - **Tools**: R, time series analysis, regression modeling, financial econometrics
 - **Outcome**: Identification of effective performance metrics and portfolio strategies validated out-of-sample
 - **Files**: Complete R code, 12-page technical report, statistical analysis
 
-### [Car Rentals Data Analysis](https://github.com/Nick-o-laos/data-analysis-portfolio/tree/8b8a7f6a05aaeb221dac5171ad62aa8033209048/Portfolio/Car%20Rentals%20Data%20Analysis)
+### [Car Rentals Data Analysis](/projects/car-rentals.html)
 **Advanced statistical analysis of 5,000+ car rental records for Motodynamiki**
 - **Objective**: Identify customer characteristics influencing on-desk service purchases
 - **Techniques**: EDA, regression modeling, bootstrap imputation, correlation analysis
