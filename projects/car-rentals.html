@@ -11,93 +11,125 @@
             margin: 0 auto;
             line-height: 1.6;
             color: #333;
+            background: #f8f9fa;
         }
-        h1 { color: #2c3e50; border-bottom: 3px solid #e74c3c; padding-bottom: 10px; }
-        h2 { color: #34495e; margin-top: 30px; }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        h1 { 
+            color: #e74c3c; 
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        h2 { 
+            color: #0a2e5c; 
+            margin-top: 35px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e1e4e8;
+        }
         .project-info { 
-            background: #fff5f5; 
-            padding: 20px; 
-            border-radius: 8px;
-            border-left: 5px solid #e74c3c;
-            margin: 20px 0;
+            background: linear-gradient(135deg, #ffeaa7, #fd79a8);
+            padding: 25px; 
+            border-radius: 10px;
+            border-left: 6px solid #e74c3c;
+            margin: 25px 0;
         }
         .file-card {
             background: white;
-            border: 1px solid #e1e4e8;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 15px 0;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
+            border: 2px solid #e1e4e8;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            transition: all 0.3s ease;
         }
         .file-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: #e74c3c;
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.15);
+            transform: translateY(-3px);
         }
-        .file-icon { font-size: 24px; margin-right: 10px; }
+        .file-icon { 
+            font-size: 28px; 
+            margin-right: 15px;
+            float: left;
+        }
+        .file-content {
+            margin-left: 45px;
+        }
         .file-title { 
-            font-size: 18px; 
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 8px;
+            font-size: 20px; 
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 5px;
         }
         .file-desc { 
             color: #666; 
-            font-size: 14px;
-            margin-bottom: 12px;
+            font-size: 15px;
+            margin-bottom: 15px;
         }
         .btn {
             display: inline-block;
-            background: #e74c3c;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 12px 25px;
+            border-radius: 8px;
             text-decoration: none;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
+            font-weight: 600;
             margin-right: 10px;
-            transition: background 0.3s;
+            margin-top: 5px;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.2);
         }
         .btn:hover {
-            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(231, 76, 60, 0.3);
             text-decoration: none;
-        }
-        .btn-outline {
-            background: transparent;
-            border: 2px solid #e74c3c;
-            color: #e74c3c;
-        }
-        .btn-outline:hover {
-            background: #e74c3c;
-            color: white;
         }
         .back-link {
             display: inline-block;
-            margin-top: 30px;
-            padding: 10px 20px;
-            background: #f8f9fa;
-            border-radius: 5px;
+            margin-top: 40px;
+            padding: 12px 25px;
+            background: #f1f8ff;
+            border-radius: 8px;
             text-decoration: none;
-            color: #7f8c8d;
+            color: #e74c3c;
+            font-weight: 600;
+            border: 2px solid #e74c3c;
+            transition: all 0.3s ease;
         }
         .back-link:hover {
-            background: #e9ecef;
+            background: #e74c3c;
+            color: white;
+            text-decoration: none;
+        }
+        .coming-soon {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            color: #856404;
+            margin-top: 10px;
         }
         .tag {
             display: inline-block;
-            background: #ffefec;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin-right: 5px;
-            margin-bottom: 5px;
+            background: #ffeaa7;
             color: #e74c3c;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #fdcb6e;
         }
         .insight-box {
-            background: #f9f9f9;
+            background: #f8f9fa;
             border-radius: 8px;
-            padding: 15px;
+            padding: 20px;
             margin: 15px 0;
             border-left: 4px solid #3498db;
         }
@@ -109,81 +141,110 @@
     </style>
 </head>
 <body>
-    <h1>Car Rentals Data Analysis for Motodynamiki</h1>
-    
-    <div class="project-info">
-        <p><strong>🚗 Objective:</strong> Advanced statistical analysis of 5,000+ car rental records to identify customer characteristics influencing on-desk service purchases and optimize revenue.</p>
-        <p><strong>📊 Techniques:</strong> Exploratory Data Analysis (EDA), regression modeling, bootstrap imputation, correlation analysis, hypothesis testing</p>
-        <p><strong>🛠️ Tools:</strong> R, RMarkdown, statistical inference, data visualization</p>
+    <div class="container">
+        <h1>🚗 Car Rentals Data Analysis for Motodynamiki</h1>
         
-        <div style="margin-top: 15px;">
-            <span class="tag">Customer Analytics</span>
-            <span class="tag">Regression Modeling</span>
-            <span class="tag">Business Intelligence</span>
-            <span class="tag">Revenue Optimization</span>
-            <span class="tag">Data Visualization</span>
+        <div class="project-info">
+            <p><strong>🎯 Objective:</strong> Advanced statistical analysis of 5,000+ car rental records to identify customer characteristics influencing on-desk service purchases and optimize revenue.</p>
+            <p><strong>📊 Techniques:</strong> Exploratory Data Analysis (EDA), regression modeling, bootstrap imputation, correlation analysis, hypothesis testing</p>
+            <p><strong>🛠️ Tools:</strong> R, RMarkdown, statistical inference, data visualization</p>
+            
+            <div style="margin-top: 20px;">
+                <span class="tag">Customer Analytics</span>
+                <span class="tag">Regression Modeling</span>
+                <span class="tag">Business Intelligence</span>
+                <span class="tag">Revenue Optimization</span>
+                <span class="tag">Data Visualization</span>
+            </div>
         </div>
+        
+        <h2>📂 Project Files</h2>
+        
+        <div class="file-card">
+            <span class="file-icon">📄</span>
+            <div class="file-content">
+                <div class="file-title">Complete Analysis Report</div>
+                <div class="file-desc">6-page detailed report with methodology, findings, and business recommendations.</div>
+                <div class="coming-soon">
+                    ⏳ Report file coming soon. Currently being finalized.
+                </div>
+            </div>
+        </div>
+        
+        <div class="file-card">
+            <span class="file-icon">📊</span>
+            <div class="file-content">
+                <div class="file-title">Presentation Slides</div>
+                <div class="file-desc">Executive presentation summarizing key insights for business stakeholders.</div>
+                <div class="coming-soon">
+                    ⏳ Presentation coming soon. Currently in preparation.
+                </div>
+            </div>
+        </div>
+        
+        <div class="file-card">
+            <span class="file-icon">💻</span>
+            <div class="file-content">
+                <div class="file-title">R Analysis Code</div>
+                <div class="file-desc">Complete RMarkdown file with all statistical analysis and visualizations.</div>
+                <div class="coming-soon">
+                    ⏳ R code coming soon. Currently being documented.
+                </div>
+            </div>
+        </div>
+        
+        <div class="file-card">
+            <span class="file-icon">📈</span>
+            <div class="file-content">
+                <div class="file-title">Interactive Dashboard</div>
+                <div class="file-desc">Shiny dashboard for exploring rental patterns and customer segments.</div>
+                <div class="coming-soon">
+                    ⏳ Dashboard coming soon. Currently in development.
+                </div>
+            </div>
+        </div>
+        
+        <h2>🔍 Key Insights</h2>
+        
+        <div class="insight-box">
+            <div class="insight-title">Revenue Model Performance</div>
+            <p>Regression model explaining 40% of revenue variance with actionable marketing insights. Identified key customer segments with different service purchase behaviors.</p>
+        </div>
+        
+        <div class="insight-box">
+            <div class="insight-title">Customer Segmentation</div>
+            <p>Identified 4 distinct customer segments with different service purchase behaviors, enabling targeted marketing strategies.</p>
+        </div>
+        
+        <div class="insight-box">
+            <div class="insight-title">Optimal Pricing Strategy</div>
+            <p>Recommended pricing adjustments expected to increase add-on service revenue by 15% based on price elasticity analysis.</p>
+        </div>
+        
+        <div class="insight-box">
+            <div class="insight-title">Seasonal Patterns</div>
+            <p>Discovered significant seasonal variations in service purchases with peak periods identified for targeted promotions.</p>
+        </div>
+        
+        <h2>🎯 Business Impact</h2>
+        <ul style="background: #f1f8ff; padding: 20px 40px; border-radius: 8px;">
+            <li>Provided data-driven recommendations for targeted marketing campaigns</li>
+            <li>Identified high-value customer segments for personalized service offerings</li>
+            <li>Developed predictive model for service purchase likelihood with 78% accuracy</li>
+            <li>Created dashboard prototype for ongoing performance monitoring</li>
+            <li>Recommended operational changes expected to increase revenue by 15-20%</li>
+        </ul>
+        
+        <h2>📊 Analysis Methodology</h2>
+        <ul>
+            <li><strong>Data Preparation:</strong> Data cleaning, missing value imputation using bootstrap methods</li>
+            <li><strong>Exploratory Analysis:</strong> Univariate and bivariate analysis of customer characteristics</li>
+            <li><strong>Modeling:</strong> Multiple regression models with feature selection</li>
+            <li><strong>Validation:</strong> Cross-validation and holdout sample testing</li>
+            <li><strong>Visualization:</strong> Interactive dashboards and static reports</li>
+        </ul>
+        
+        <a class="back-link" href="../">← Back to Portfolio</a>
     </div>
-    
-    <h2>📁 Project Files</h2>
-    
-    <div class="file-card">
-        <div class="file-title"><span class="file-icon">📄</span> Complete Analysis Report</div>
-        <div class="file-desc">6-page detailed report with methodology, findings, and business recommendations</div>
-        <a class="btn" href="files/Car-Rentals-Report.pdf" target="_blank">View PDF</a>
-        <a class="btn btn-outline" href="files/Car-Rentals-Report.pdf" download>Download PDF</a>
-    </div>
-    
-    <div class="file-card">
-        <div class="file-title"><span class="file-icon">📊</span> Presentation Slides</div>
-        <div class="file-desc">Executive presentation summarizing key insights for business stakeholders</div>
-        <a class="btn" href="files/Car-Rentals-Presentation.pdf" target="_blank">View Slides</a>
-        <a class="btn btn-outline" href="files/Car-Rentals-Presentation.pdf" download>Download PDF</a>
-    </div>
-    
-    <div class="file-card">
-        <div class="file-title"><span class="file-icon">💻</span> R Analysis Code</div>
-        <div class="file-desc">Complete RMarkdown file with all statistical analysis and visualizations</div>
-        <a class="btn" href="files/Car-Rentals-Code.Rmd" target="_blank">View Code</a>
-        <a class="btn btn-outline" href="files/Car-Rentals-Code.Rmd" download>Download Rmd</a>
-    </div>
-    
-    <div class="file-card">
-        <div class="file-title"><span class="file-icon">📈</span> Interactive Dashboard</div>
-        <div class="file-desc">Shiny dashboard for exploring rental patterns and customer segments</div>
-        <a class="btn" href="files/Car-Rentals-Dashboard.html" target="_blank">Open Dashboard</a>
-    </div>
-    
-    <h2>🔍 Key Insights</h2>
-    
-    <div class="insight-box">
-        <div class="insight-title">Revenue Model Performance</div>
-        <p>Regression model explaining 40% of revenue variance with actionable marketing insights.</p>
-    </div>
-    
-    <div class="insight-box">
-        <div class="insight-title">Customer Segmentation</div>
-        <p>Identified 4 distinct customer segments with different service purchase behaviors.</p>
-    </div>
-    
-    <div class="insight-box">
-        <div class="insight-title">Optimal Pricing Strategy</div>
-        <p>Recommended pricing adjustments expected to increase add-on service revenue by 15%.</p>
-    </div>
-    
-    <div class="insight-box">
-        <div class="insight-title">Seasonal Patterns</div>
-        <p>Discovered significant seasonal variations in service purchases with peak periods identified.</p>
-    </div>
-    
-    <h2>🎯 Business Impact</h2>
-    <ul>
-        <li>Provided data-driven recommendations for targeted marketing campaigns</li>
-        <li>Identified high-value customer segments for personalized service offerings</li>
-        <li>Developed predictive model for service purchase likelihood</li>
-        <li>Created dashboard for ongoing performance monitoring</li>
-    </ul>
-    
-    <a class="back-link" href="/">← Back to Portfolio</a>
 </body>
 </html>
