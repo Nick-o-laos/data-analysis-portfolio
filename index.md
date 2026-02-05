@@ -4,7 +4,7 @@ Welcome to my data analysis portfolio! I'm a Statistics postgraduate specializin
 
 ## 📚 Featured Projects
 
-### [Financial Analysis of US Mutual Funds](Financial%20Analysis%20on%20USD%20funds/)
+### [Financial Analysis of US Mutual Funds](Portfolio/Financial Analysis on USD funds)
 **Comprehensive analysis of 90 US mutual funds (1963-2019)**
 - **Objective**: Evaluate fund performance metrics and portfolio construction strategies
 - **Techniques**: Sharpe/Treynor/Sortino ratios, Jensen's alpha, GARCH modeling, portfolio optimization
