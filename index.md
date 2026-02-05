@@ -3,8 +3,7 @@
 Welcome to my data analysis portfolio! I'm a Statistics postgraduate specializing in advanced data analysis with R, Python, and statistical modeling.
 
 ## 📚 Featured Projects
-
-### [Greek Super League Analysis 2013-2014](/projects/greek-super-league.html)
+### [Greek Super League Analysis 2013-2014](https://github.com/Nick-o-laos/data-analysis-portfolio/blob/d41a96871147a09849b72a7f84880e0ac0a3a99d/projects/greek-super-league.html)
 **Comprehensive analysis of football match results and betting odds**
 - **Objective**: Analyze match statistics, betting odds correlations, and build predictive models for bookmaker odds
 - **Techniques**: Descriptive statistics, correlation analysis, linear regression, logistic regression, multicollinearity diagnosis (VIF), assumption testing
@@ -13,14 +12,14 @@ Welcome to my data analysis portfolio! I'm a Statistics postgraduate specializin
 - **Files**: Complete R code, 17-page technical report, animated standings visualization, HTML output
 - **Special Features**: Animated standings board showing weekly team progression
 
-### [Financial Analysis on USD funds](/projects/financial-analysis.html)**
+### [Financial Analysis on USD funds](https://github.com/Nick-o-laos/data-analysis-portfolio/blob/d41a96871147a09849b72a7f84880e0ac0a3a99d/projects/financial-analysis.html)
 - **Objective**: Evaluate fund performance metrics and portfolio construction strategies
 - **Techniques**: Sharpe/Treynor/Sortino ratios, Jensen's alpha, GARCH modeling, portfolio optimization
 - **Tools**: R, time series analysis, regression modeling, financial econometrics
 - **Outcome**: Identification of effective performance metrics and portfolio strategies validated out-of-sample
 - **Files**: Complete R code, 12-page technical report, statistical analysis
 
-### [Car Rentals Data Analysis](/projects/car-rentals.html)
+### [Car Rentals Data Analysis](https://github.com/Nick-o-laos/data-analysis-portfolio/blob/d41a96871147a09849b72a7f84880e0ac0a3a99d/projects/car-rentals.html)
 **Advanced statistical analysis of 5,000+ car rental records for Motodynamiki**
 - **Objective**: Identify customer characteristics influencing on-desk service purchases
 - **Techniques**: EDA, regression modeling, bootstrap imputation, correlation analysis
