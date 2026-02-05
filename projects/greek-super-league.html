@@ -25,6 +25,12 @@
             padding-bottom: 10px;
             margin-top: 0;
         }
+        h2 { 
+            color: #0a2e5c; 
+            margin-top: 35px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e1e4e8;
+        }
         .project-info { 
             background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
             padding: 25px; 
@@ -43,6 +49,26 @@
         .file-card:hover {
             border-color: #40c4ff;
             box-shadow: 0 6px 20px rgba(64, 196, 255, 0.15);
+            transform: translateY(-3px);
+        }
+        .file-icon { 
+            font-size: 28px; 
+            margin-right: 15px;
+            float: left;
+        }
+        .file-content {
+            margin-left: 45px;
+        }
+        .file-title { 
+            font-size: 20px; 
+            font-weight: 700;
+            color: #005b96;
+            margin-bottom: 5px;
+        }
+        .file-desc { 
+            color: #666; 
+            font-size: 15px;
+            margin-bottom: 15px;
         }
         .btn {
             display: inline-block;
@@ -53,11 +79,27 @@
             text-decoration: none;
             font-weight: 600;
             margin-right: 10px;
+            margin-top: 5px;
             transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 91, 150, 0.2);
         }
         .btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 91, 150, 0.3);
             text-decoration: none;
+        }
+        .btn-pdf {
+            background: linear-gradient(135deg, #ff6b6b, #c0392b);
+        }
+        .btn-html {
+            background: linear-gradient(135deg, #1dd1a1, #10ac84);
+        }
+        .btn-code {
+            background: linear-gradient(135deg, #54a0ff, #2e86de);
+        }
+        .btn-data {
+            background: linear-gradient(135deg, #ff9ff3, #f368e0);
         }
         .back-link {
             display: inline-block;
@@ -69,11 +111,32 @@
             color: #005b96;
             font-weight: 600;
             border: 2px solid #40c4ff;
+            transition: all 0.3s ease;
         }
         .back-link:hover {
             background: #40c4ff;
             color: white;
             text-decoration: none;
+        }
+        .coming-soon {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            color: #856404;
+            margin-top: 10px;
+        }
+        .tag {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #005b96;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #bbdefb;
         }
     </style>
 </head>
@@ -83,47 +146,72 @@
         
         <div class="project-info">
             <p><strong>🎯 Objective:</strong> Comprehensive analysis of football match results and betting odds for the 2013-2014 Greek Super League season.</p>
-            <p><strong>📊 Techniques:</strong> Descriptive statistics, correlation analysis, linear regression, logistic regression</p>
-            <p><strong>🛠️ Tools:</strong> R, ggplot2, corrplot, psych, car, lmtest, RMarkdown</p>
+            <p><strong>📊 Techniques:</strong> Descriptive statistics, correlation analysis, linear regression, logistic regression, multicollinearity diagnosis (VIF), assumption testing</p>
+            <p><strong>🛠️ Tools:</strong> R, ggplot2, corrplot, psych, car, lmtest, nortest, RMarkdown</p>
+            
+            <div style="margin-top: 20px;">
+                <span class="tag">Sports Analytics</span>
+                <span class="tag">Regression Modeling</span>
+                <span class="tag">Betting Odds Analysis</span>
+                <span class="tag">Data Visualization</span>
+                <span class="tag">Statistical Inference</span>
+            </div>
         </div>
         
         <h2>📂 Project Files</h2>
         
         <div class="file-card">
-            <div style="font-size: 20px; font-weight: 700; color: #005b96; margin-bottom: 10px;">📄 Complete Technical Report</div>
-            <div style="color: #666; margin-bottom: 15px;">17-page PDF report with full analysis, methodology, and conclusions</div>
-            <a class="btn" href="../Portfolio/Football%20Analytics%20on%20Super%20League%202013-2014/Report.pdf" target="_blank">View PDF Report</a>
+            <span class="file-icon">📄</span>
+            <div class="file-content">
+                <div class="file-title">Complete Technical Report</div>
+                <div class="file-desc">17-page PDF report with full analysis, methodology, results, and conclusions.</div>
+                <a class="btn btn-pdf" href="../Portfolio/Football%20Analytics%20on%20Super%20League%202013-2014/Report.pdf" target="_blank">View PDF Report</a>
+            </div>
         </div>
         
         <div class="file-card">
-            <div style="font-size: 20px; font-weight: 700; color: #005b96; margin-bottom: 10px;">📊 RMarkdown Analysis</div>
-            <div style="color: #666; margin-bottom: 15px;">Complete RMarkdown file with all code and analysis</div>
-            <a class="btn" href="../Portfolio/Football%20Analytics%20on%20Super%20League%202013-2014/Code.Rmd" target="_blank">View RMarkdown</a>
+            <span class="file-icon">📊</span>
+            <div class="file-content">
+                <div class="file-title">RMarkdown Analysis Document</div>
+                <div class="file-desc">Complete RMarkdown file with all code, analysis, and visualizations.</div>
+                <a class="btn btn-code" href="../Portfolio/Football%20Analytics%20on%20Super%20League%202013-2014/Code.Rmd" target="_blank">View RMarkdown Code</a>
+            </div>
         </div>
         
         <div class="file-card">
-            <div style="font-size: 20px; font-weight: 700; color: #005b96; margin-bottom: 10px;">📈 Animated Standings Board</div>
-            <div style="color: #666; margin-bottom: 15px;">HTML visualization showing weekly team standings</div>
-            <a class="btn" href="../Portfolio/Football%20Analytics%20on%20Super%20League%202013-2014/Standings-Board.html" target="_blank">Open Standings Board</a>
+            <span class="file-icon">📈</span>
+            <div class="file-content">
+                <div class="file-title">Animated Standings Board</div>
+                <div class="file-desc">Interactive HTML visualization showing weekly progression of team standings.</div>
+                <a class="btn btn-html" href="../Portfolio/Football%20Analytics%20on%20Super%20League%202013-2014/Standings-Board.html" target="_blank">Open Standings Board</a>
+            </div>
         </div>
         
         <div class="file-card">
-            <div style="font-size: 20px; font-weight: 700; color: #005b96; margin-bottom: 10px;">📋 Standings Board Code</div>
-            <div style="color: #666; margin-bottom: 15px;">RMarkdown file for the standings visualization</div>
-            <a class="btn" href="../Portfolio/Football%20Analytics%20on%20Super%20League%202013-2014/Standings%20Board.Rmd" target="_blank">View RMarkdown Code</a>
+            <span class="file-icon">📋</span>
+            <div class="file-content">
+                <div class="file-title">Standings Board Source Code</div>
+                <div class="file-desc">RMarkdown file used to generate the animated standings visualization.</div>
+                <a class="btn btn-code" href="../Portfolio/Football%20Analytics%20on%20Super%20League%202013-2014/Standings%20Board.Rmd" target="_blank">View RMarkdown Code</a>
+            </div>
         </div>
         
         <div class="file-card">
-            <div style="font-size: 20px; font-weight: 700; color: #005b96; margin-bottom: 10px;">📊 Raw Dataset</div>
-            <div style="color: #666; margin-bottom: 15px;">CSV file with match results and betting odds</div>
-            <a class="btn" href="../Portfolio/Football%20Analytics%20on%20Super%20League%202013-2014/11_super_league_2013-14.csv" target="_blank">View Dataset</a>
+            <span class="file-icon">📊</span>
+            <div class="file-content">
+                <div class="file-title">Raw Dataset</div>
+                <div class="file-desc">CSV file containing match results and betting odds from the 2013-2014 season.</div>
+                <a class="btn btn-data" href="../Portfolio/Football%20Analytics%20on%20Super%20League%202013-2014/11_super_league_2013-14.csv" target="_blank">View CSV Dataset</a>
+            </div>
         </div>
         
-        <h2>🔍 Key Findings</h2>
+        <h2>🎯 Key Findings</h2>
         <ul style="background: #f1f8ff; padding: 20px 40px; border-radius: 8px;">
-            <li><strong>Home Advantage:</strong> Clear evidence of home team superiority</li>
-            <li><strong>Odds Correlation:</strong> Extremely high correlation among bookmakers' odds</li>
-            <li><strong>Olympiakos Dominance:</strong> Champion team with 17-point lead</li>
+            <li><strong>Home Advantage:</strong> Clear evidence of home team superiority in goals scored and match outcomes</li>
+            <li><strong>Odds Correlation:</strong> Extremely high correlation among bookmakers' odds (≈0.99), indicating market efficiency</li>
+            <li><strong>Olympiakos Dominance:</strong> Champion team with 17-point lead, including a 4-0 halftime lead in one match</li>
+            <li><strong>Predictive Challenges:</strong> Difficulty in accurately predicting odds from match statistics alone</li>
+            <li><strong>Statistical Significance:</strong> FTHG and FTAG identified as significant predictors in regression models</li>
         </ul>
         
         <a class="back-link" href="../">← Back to Portfolio</a>
