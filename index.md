@@ -13,7 +13,7 @@ Welcome to my data analysis portfolio! I'm a Statistics postgraduate specializin
 - **Files**: Complete R code, 17-page technical report, animated standings visualization, HTML output
 - **Special Features**: Animated standings board showing weekly team progression
 
-### ([Financial Analysis on USD funds](https://github.com/Nick-o-laos/data-analysis-portfolio/tree/990d34014a91fcba264016680f8cc034b78b638f/Portfolio/Financial%20Analysis%20on%20USD%20funds))
+### [Financial Analysis on USD funds](https://github.com/Nick-o-laos/data-analysis-portfolio/tree/990d34014a91fcba264016680f8cc034b78b638f/Portfolio/Financial%20Analysis%20on%20USD%20funds)
 **Comprehensive analysis of 90 US mutual funds (1963-2019)**
 - **Objective**: Evaluate fund performance metrics and portfolio construction strategies
 - **Techniques**: Sharpe/Treynor/Sortino ratios, Jensen's alpha, GARCH modeling, portfolio optimization
