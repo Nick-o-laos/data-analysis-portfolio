@@ -3,601 +3,447 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Analysis Portfolio</title>
+    <title>Nikolaos Papadopoulos | Data Analysis Portfolio</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* Reset and Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        /* Header Styles */
-        header {
-            background: linear-gradient(135deg, #2c3e50, #4a6491);
-            color: white;
-            padding: 60px 0;
-            text-align: center;
-            border-radius: 0 0 20px 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            margin-bottom: 40px;
-        }
-        
-        .header-content {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            background: linear-gradient(45deg, #3498db, #2ecc71);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        
-        .subtitle {
-            font-size: 1.3rem;
-            opacity: 0.9;
-            margin-bottom: 20px;
-        }
-        
-        /* Main Content Styles */
-        main {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            margin-bottom: 40px;
-        }
-        
-        section {
-            margin-bottom: 50px;
-        }
-        
-        h2 {
-            color: #2c3e50;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 10px;
-            margin-bottom: 25px;
-            font-size: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        h2 i {
-            color: #3498db;
-        }
-        
-        /* Project Cards */
-        .project-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            margin-top: 20px;
-        }
-        
-        .project-card {
-            background: #f8f9fa;
-            border-radius: 15px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            border: 1px solid #e1e4e8;
-            position: relative;
-        }
-        
-        .project-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            border-color: #3498db;
-        }
-        
-        .project-header {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-            padding: 20px;
-        }
-        
-        .project-header h3 {
-            font-size: 1.4rem;
-            margin-bottom: 5px;
-        }
-        
-        .project-header a {
-            color: white;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        
-        .project-header a:hover {
-            color: #f1c40f;
-            text-decoration: underline;
-        }
-        
-        .project-content {
-            padding: 25px;
-        }
-        
-        .project-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin: 15px 0;
-        }
-        
-        .tag {
-            background: #e3f2fd;
-            color: #1976d2;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-        
-        .project-features {
-            list-style: none;
-            margin-top: 15px;
-        }
-        
-        .project-features li {
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-            position: relative;
-            padding-left: 25px;
-        }
-        
-        .project-features li:before {
-            content: "✓";
-            color: #2ecc71;
-            font-weight: bold;
-            position: absolute;
-            left: 0;
-        }
-        
-        /* Skills Section */
-        .skills-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-        
-        .skill-category {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 15px;
-            border-left: 5px solid #3498db;
-        }
-        
-        .skill-category h3 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 1.3rem;
-        }
-        
-        .skill-list {
-            list-style: none;
-        }
-        
-        .skill-list li {
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .skill-list li i {
-            color: #3498db;
-            width: 20px;
-        }
-        
-        /* Contact Section */
-        .contact-info {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
-            justify-content: center;
-        }
-        
-        .contact-item {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            padding: 25px;
-            border-radius: 15px;
-            text-align: center;
-            min-width: 200px;
-            transition: all 0.3s ease;
-        }
-        
-        .contact-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-        
-        .contact-item i {
-            font-size: 2.5rem;
-            color: #3498db;
-            margin-bottom: 15px;
-        }
-        
-        .contact-item a {
-            color: #2c3e50;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s;
-        }
-        
-        .contact-item a:hover {
-            color: #3498db;
-            text-decoration: underline;
-        }
-        
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 30px;
-            color: #666;
-            border-top: 1px solid #eee;
-            margin-top: 40px;
-        }
-        
-        .update-date {
-            font-style: italic;
-            color: #7f8c8d;
-            margin-top: 10px;
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            header {
-                padding: 40px 0;
-            }
-            
-            h1 {
-                font-size: 2.2rem;
-            }
-            
-            main {
-                padding: 20px;
-            }
-            
-            .project-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .skills-container {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        /* Animation */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .project-card, .skill-category, .contact-item {
-            animation: fadeIn 0.6s ease-out;
-        }
-        
-        /* Project Structure */
-        .structure-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .structure-item {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 10px;
-            text-align: center;
-            transition: transform 0.3s;
-        }
-        
-        .structure-item:hover {
-            transform: translateY(-5px);
-        }
-        
-        .structure-icon {
-            font-size: 2rem;
-            color: #3498db;
-            margin-bottom: 15px;
-        }
-        
-        .structure-item h4 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <h1>Data Analysis Portfolio</h1>
-            <p class="subtitle">Statistics Postgraduate | Advanced Data Analyst | R & Python Specialist</p>
-            <p>Welcome to my data analysis portfolio! I'm a Statistics postgraduate specializing in advanced data analysis with R, Python, and statistical modeling.</p>
+    <!-- Header & Navigation -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h1><span class="logo-accent">NP</span> Analytics</h1>
+                <p class="tagline">Data Science • Statistics • Finance</p>
+            </div>
+            <nav class="nav">
+                <ul>
+                    <li><a href="#home" class="active"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="#projects"><i class="fas fa-project-diagram"></i> Projects</a></li>
+                    <li><a href="#skills"><i class="fas fa-code"></i> Skills</a></li>
+                    <li><a href="#about"><i class="fas fa-user"></i> About</a></li>
+                    <li><a href="#contact"><i class="fas fa-envelope"></i> Contact</a></li>
+                </ul>
+            </nav>
+            <div class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
         </div>
     </header>
-    
-    <div class="container">
-        <main>
-            <!-- Featured Projects Section -->
-            <section id="projects">
-                <h2><i class="fas fa-star"></i> Featured Projects</h2>
-                
-                <div class="project-grid">
-                    <!-- Greek Super League Project -->
-                    <div class="project-card">
-                        <div class="project-header">
-                            <h3><a href="projects/greek-super-league.html">Greek Super League Analysis 2013-2014</a></h3>
-                            <p><i class="fas fa-futbol"></i> Sports Analytics</p>
-                        </div>
-                        <div class="project-content">
-                            <p><strong>Comprehensive analysis of football match results and betting odds</strong></p>
-                            <div class="project-tags">
-                                <span class="tag">R Programming</span>
-                                <span class="tag">Regression</span>
-                                <span class="tag">Data Visualization</span>
-                                <span class="tag">Sports Analytics</span>
-                            </div>
-                            <ul class="project-features">
-                                <li><strong>Objective:</strong> Analyze match statistics, betting odds correlations, and build predictive models</li>
-                                <li><strong>Techniques:</strong> Descriptive statistics, correlation analysis, linear & logistic regression</li>
-                                <li><strong>Tools:</strong> R, ggplot2, corrplot, psych, car, lmtest, RMarkdown</li>
-                                <li><strong>Key Findings:</strong> Home team advantage confirmed, strong correlation among bookmaker odds</li>
-                                <li><strong>Special Features:</strong> Animated standings board showing weekly team progression</li>
-                            </ul>
-                        </div>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h2>Quantitative Analysis &<br>Financial Modeling</h2>
+                <p class="subtitle">Advanced statistical methods applied to finance, economics, and business intelligence</p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <h3>9</h3>
+                        <p>Projects Completed</p>
                     </div>
-                    
-                    <!-- Financial Analysis Project -->
-                    <div class="project-card">
-                        <div class="project-header">
-                            <h3><a href="projects/financial-analysis.html">Financial Analysis on USD Funds</a></h3>
-                            <p><i class="fas fa-chart-line"></i> Financial Analytics</p>
-                        </div>
-                        <div class="project-content">
-                            <p><strong>Analysis of 90 US mutual funds (1963-2019)</strong></p>
-                            <div class="project-tags">
-                                <span class="tag">Financial Modeling</span>
-                                <span class="tag">Time Series</span>
-                                <span class="tag">Portfolio Optimization</span>
-                                <span class="tag">GARCH</span>
-                            </div>
-                            <ul class="project-features">
-                                <li><strong>Objective:</strong> Evaluate fund performance metrics and portfolio construction strategies</li>
-                                <li><strong>Techniques:</strong> Sharpe/Treynor/Sortino ratios, Jensen's alpha, GARCH modeling</li>
-                                <li><strong>Tools:</strong> R, time series analysis, regression modeling, financial econometrics</li>
-                                <li><strong>Outcome:</strong> Effective performance metrics and portfolio strategies validated out-of-sample</li>
-                                <li><strong>Files:</strong> Complete R code, 12-page technical report, statistical analysis</li>
-                            </ul>
-                        </div>
+                    <div class="stat">
+                        <h3>15+</h3>
+                        <p>Statistical Methods</p>
                     </div>
-                    
-                    <!-- Car Rentals Project -->
-                    <div class="project-card">
-                        <div class="project-header">
-                            <h3><a href="projects/car-rentals.html">Car Rentals Data Analysis</a></h3>
-                            <p><i class="fas fa-car"></i> Business Intelligence</p>
-                        </div>
-                        <div class="project-content">
-                            <p><strong>Advanced statistical analysis of 5,000+ car rental records for Motodynamiki</strong></p>
-                            <div class="project-tags">
-                                <span class="tag">EDA</span>
-                                <span class="tag">Regression</span>
-                                <span class="tag">Business Analytics</span>
-                                <span class="tag">Customer Insights</span>
-                            </div>
-                            <ul class="project-features">
-                                <li><strong>Objective:</strong> Identify customer characteristics influencing on-desk service purchases</li>
-                                <li><strong>Techniques:</strong> EDA, regression modeling, bootstrap imputation, correlation analysis</li>
-                                <li><strong>Tools:</strong> R, RMarkdown, statistical inference</li>
-                                <li><strong>Outcome:</strong> Regression model explaining 40% of revenue variance with actionable marketing insights</li>
-                                <li><strong>Files:</strong> Complete R code, 6-page report, presentation slides</li>
-                            </ul>
-                        </div>
+                    <div class="stat">
+                        <h3>100%</h3>
+                        <p>Python Based</p>
                     </div>
                 </div>
-                
-                <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-                    <p><i class="fas fa-plus-circle"></i> <em>More projects will be added here</em></p>
+                <a href="#projects" class="btn-primary">View Portfolio <i class="fas fa-arrow-down"></i></a>
+            </div>
+            <div class="hero-visual">
+                <div class="chart-container">
+                    <canvas id="heroChart"></canvas>
                 </div>
-            </section>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="skills">
+        <div class="container">
+            <h2 class="section-title">Technical Expertise</h2>
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <h3><i class="fas fa-chart-line"></i> Statistical Analysis</h3>
+                    <div class="skill-items">
+                        <span class="skill-tag">Bayesian Inference</span>
+                        <span class="skill-tag">Time Series</span>
+                        <span class="skill-tag">Hypothesis Testing</span>
+                        <span class="skill-tag">Regression Analysis</span>
+                        <span class="skill-tag">MCMC Methods</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h3><i class="fas fa-code"></i> Programming</h3>
+                    <div class="skill-items">
+                        <span class="skill-tag">Python</span>
+                        <span class="skill-tag">R</span>
+                        <span class="skill-tag">SQL</span>
+                        <span class="skill-tag">JavaScript</span>
+                        <span class="skill-tag">HTML/CSS</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h3><i class="fas fa-coins"></i> Finance & Economics</h3>
+                    <div class="skill-items">
+                        <span class="skill-tag">Financial Modeling</span>
+                        <span class="skill-tag">Risk Analysis</span>
+                        <span class="skill-tag">Derivatives Pricing</span>
+                        <span class="skill-tag">Portfolio Theory</span>
+                        <span class="skill-tag">DeFi</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h3><i class="fas fa-cogs"></i> Tools & Libraries</h3>
+                    <div class="skill-items">
+                        <span class="skill-tag">NumPy/Pandas</span>
+                        <span class="skill-tag">Scikit-learn</span>
+                        <span class="skill-tag">TensorFlow</span>
+                        <span class="skill-tag">Matplotlib/Seaborn</span>
+                        <span class="skill-tag">Jupyter</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="projects">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Data Analysis Projects</h2>
+                <p class="section-subtitle">9 comprehensive analyses using advanced statistical and machine learning techniques</p>
+            </div>
             
-            <!-- Technical Skills Section -->
-            <section id="skills">
-                <h2><i class="fas fa-tools"></i> Technical Skills</h2>
-                
-                <div class="skills-container">
-                    <div class="skill-category">
-                        <h3>Statistical Analysis</h3>
-                        <ul class="skill-list">
-                            <li><i class="fas fa-chart-bar"></i> Regression Analysis</li>
-                            <li><i class="fas fa-wave-square"></i> Time Series Analysis</li>
-                            <li><i class="fas fa-check-circle"></i> Hypothesis Testing</li>
-                            <li><i class="fas fa-money-bill-wave"></i> Financial Econometrics</li>
-                            <li><i class="fas fa-futbol"></i> Sports Analytics</li>
-                        </ul>
+            <!-- Project Filters -->
+            <div class="project-filters">
+                <button class="filter-btn active" data-filter="all">All Projects</button>
+                <button class="filter-btn" data-filter="finance">Finance</button>
+                <button class="filter-btn" data-filter="statistics">Statistics</button>
+                <button class="filter-btn" data-filter="machine-learning">Machine Learning</button>
+                <button class="filter-btn" data-filter="economics">Economics</button>
+                <button class="filter-btn" data-filter="visualization">Visualization</button>
+            </div>
+            
+            <!-- Projects Grid -->
+            <div class="projects-grid">
+                <!-- Project 1: Machine Learning in Finance -->
+                <div class="project-card" data-category="finance machine-learning">
+                    <div class="project-header">
+                        <span class="project-category finance">Finance</span>
+                        <span class="project-category ml">ML</span>
+                        <h3 class="project-title">Machine Learning Techniques in Finance</h3>
                     </div>
-                    
-                    <div class="skill-category">
-                        <h3>Programming & Tools</h3>
-                        <ul class="skill-list">
-                            <li><i class="fab fa-r-project"></i> R Programming</li>
-                            <li><i class="fab fa-python"></i> Python</li>
-                            <li><i class="fas fa-database"></i> SQL</li>
-                            <li><i class="fab fa-git-alt"></i> Git</li>
-                            <li><i class="fas fa-docker"></i> Docker</li>
-                            <li><i class="fas fa-shield-alt"></i> Shiny Apps</li>
-                        </ul>
+                    <div class="project-body">
+                        <p class="project-description">Metropolis-Hastings, Gibbs sampling, and K-Means applied to stock price prediction and DeFi derivatives pricing.</p>
+                        <div class="project-tech">
+                            <span>Python</span>
+                            <span>MCMC</span>
+                            <span>GARCH</span>
+                            <span>Black-Scholes</span>
+                        </div>
                     </div>
-                    
-                    <div class="skill-category">
-                        <h3>Data Visualization</h3>
-                        <ul class="skill-list">
-                            <li><i class="fas fa-chart-line"></i> ggplot2</li>
-                            <li><i class="fas fa-chart-pie"></i> Plotly</li>
-                            <li><i class="fas fa-tachometer-alt"></i> Tableau</li>
-                            <li><i class="fas fa-project-diagram"></i> corrplot</li>
-                            <li><i class="fas fa-map"></i> Interactive Dashboards</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="skill-category">
-                        <h3>Domain Expertise</h3>
-                        <ul class="skill-list">
-                            <li><i class="fas fa-chart-line"></i> Financial Analytics</li>
-                            <li><i class="fas fa-briefcase"></i> Business Intelligence</li>
-                            <li><i class="fas fa-brain"></i> Predictive Modeling</li>
-                            <li><i class="fas fa-futbol"></i> Sports Analytics</li>
-                            <li><i class="fas fa-users"></i> Customer Analytics</li>
-                        </ul>
+                    <div class="project-footer">
+                        <a href="project-ml-finance.html" class="btn-secondary">View Details <i class="fas fa-arrow-right"></i></a>
+                        <div class="project-links">
+                            <a href="#" class="link-icon"><i class="fab fa-github"></i></a>
+                            <a href="#" class="link-icon"><i class="fas fa-file-pdf"></i></a>
+                        </div>
                     </div>
                 </div>
-            </section>
-            
-            <!-- Project Structure Section -->
-            <section id="structure">
-                <h2><i class="fas fa-folder-open"></i> Project Structure</h2>
-                <p>Each project in my portfolio includes comprehensive documentation and reproducible analysis:</p>
                 
-                <div class="structure-grid">
-                    <div class="structure-item">
-                        <div class="structure-icon">
-                            <i class="fas fa-code"></i>
-                        </div>
-                        <h4>Complete Analysis Code</h4>
-                        <p>Reproducible RMarkdown files with all analysis code and comments</p>
+                <!-- Project 2: Data Wrangling & EDA -->
+                <div class="project-card" data-category="statistics visualization">
+                    <div class="project-header">
+                        <span class="project-category stats">Statistics</span>
+                        <span class="project-category viz">Viz</span>
+                        <h3 class="project-title">Data Wrangling & Exploratory Analysis</h3>
                     </div>
-                    
-                    <div class="structure-item">
-                        <div class="structure-icon">
-                            <i class="fas fa-file-alt"></i>
+                    <div class="project-body">
+                        <p class="project-description">Comprehensive data cleaning, transformation, and visualization pipeline for large datasets.</p>
+                        <div class="project-tech">
+                            <span>Pandas</span>
+                            <span>Seaborn</span>
+                            <span>Data Cleaning</span>
+                            <span>EDA</span>
                         </div>
-                        <h4>Detailed Technical Report</h4>
-                        <p>Comprehensive methodology, findings, and conclusions in PDF format</p>
                     </div>
-                    
-                    <div class="structure-item">
-                        <div class="structure-icon">
-                            <i class="fas fa-book"></i>
+                    <div class="project-footer">
+                        <a href="project-eda.html" class="btn-secondary">View Details <i class="fas fa-arrow-right"></i></a>
+                        <div class="project-links">
+                            <a href="#" class="link-icon"><i class="fab fa-github"></i></a>
                         </div>
-                        <h4>Clean Documentation</h4>
-                        <p>Project overview, setup instructions, and technical specifications</p>
-                    </div>
-                    
-                    <div class="structure-item">
-                        <div class="structure-icon">
-                            <i class="fas fa-chart-bar"></i>
-                        </div>
-                        <h4>Interactive Visualizations</h4>
-                        <p>Static and interactive plots, dashboards, and data visualizations</p>
                     </div>
                 </div>
-            </section>
-            
-            <!-- Contact Section -->
-            <section id="contact">
-                <h2><i class="fas fa-envelope"></i> Contact</h2>
                 
+                <!-- Project 3: Time Series Forecasting -->
+                <div class="project-card" data-category="finance statistics">
+                    <div class="project-header">
+                        <span class="project-category finance">Finance</span>
+                        <span class="project-category stats">Statistics</span>
+                        <h3 class="project-title">Time Series Forecasting Models</h3>
+                    </div>
+                    <div class="project-body">
+                        <p class="project-description">ARIMA, SARIMA, and Prophet models applied to financial and economic time series data.</p>
+                        <div class="project-tech">
+                            <span>ARIMA</span>
+                            <span>Prophet</span>
+                            <span>Forecasting</span>
+                            <span>Statsmodels</span>
+                        </div>
+                    </div>
+                    <div class="project-footer">
+                        <a href="project-timeseries.html" class="btn-secondary">View Details <i class="fas fa-arrow-right"></i></a>
+                        <div class="project-links">
+                            <a href="#" class="link-icon"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 4: Housing Prices Analysis -->
+                <div class="project-card" data-category="economics statistics">
+                    <div class="project-header">
+                        <span class="project-category economics">Economics</span>
+                        <span class="project-category stats">Statistics</span>
+                        <h3 class="project-title">Housing Market Regression Analysis</h3>
+                    </div>
+                    <div class="project-body">
+                        <p class="project-description">Multivariate regression analysis of housing prices with feature importance and prediction intervals.</p>
+                        <div class="project-tech">
+                            <span>Regression</span>
+                            <span>Scikit-learn</span>
+                            <span>Feature Importance</span>
+                            <span>OLS</span>
+                        </div>
+                    </div>
+                    <div class="project-footer">
+                        <a href="project-housing.html" class="btn-secondary">View Details <i class="fas fa-arrow-right"></i></a>
+                        <div class="project-links">
+                            <a href="#" class="link-icon"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 5: Statistical Inference -->
+                <div class="project-card" data-category="statistics">
+                    <div class="project-header">
+                        <span class="project-category stats">Statistics</span>
+                        <h3 class="project-title">Statistical Inference & Hypothesis Testing</h3>
+                    </div>
+                    <div class="project-body">
+                        <p class="project-description">Frequentist and Bayesian approaches to hypothesis testing with practical applications.</p>
+                        <div class="project-tech">
+                            <span>A/B Testing</span>
+                            <span>Bayesian</span>
+                            <span>p-values</span>
+                            <span>Confidence Intervals</span>
+                        </div>
+                    </div>
+                    <div class="project-footer">
+                        <a href="project-inference.html" class="btn-secondary">View Details <i class="fas fa-arrow-right"></i></a>
+                        <div class="project-links">
+                            <a href="#" class="link-icon"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 6: Data Visualization -->
+                <div class="project-card" data-category="visualization">
+                    <div class="project-header">
+                        <span class="project-category viz">Visualization</span>
+                        <h3 class="project-title">Advanced Data Visualization Techniques</h3>
+                    </div>
+                    <div class="project-body">
+                        <p class="project-description">Interactive dashboards and advanced plotting techniques for data storytelling.</p>
+                        <div class="project-tech">
+                            <span>Plotly</span>
+                            <span>Dash</span>
+                            <span>Matplotlib</span>
+                            <span>D3.js</span>
+                        </div>
+                    </div>
+                    <div class="project-footer">
+                        <a href="project-visualization.html" class="btn-secondary">View Details <i class="fas fa-arrow-right"></i></a>
+                        <div class="project-links">
+                            <a href="#" class="link-icon"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 7: Business Intelligence -->
+                <div class="project-card" data-category="economics">
+                    <div class="project-header">
+                        <span class="project-category economics">Economics</span>
+                        <h3 class="project-title">Business Intelligence Dashboard</h3>
+                    </div>
+                    <div class="project-body">
+                        <p class="project-description">Interactive BI dashboard for sales, customer, and operational analytics.</p>
+                        <div class="project-tech">
+                            <span>Tableau</span>
+                            <span>SQL</span>
+                            <span>Dashboard</span>
+                            <span>KPIs</span>
+                        </div>
+                    </div>
+                    <div class="project-footer">
+                        <a href="project-bi.html" class="btn-secondary">View Details <i class="fas fa-arrow-right"></i></a>
+                        <div class="project-links">
+                            <a href="#" class="link-icon"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 8: Interactive Visualizations -->
+                <div class="project-card" data-category="visualization machine-learning">
+                    <div class="project-header">
+                        <span class="project-category viz">Visualization</span>
+                        <span class="project-category ml">ML</span>
+                        <h3 class="project-title">Interactive ML Visualizations</h3>
+                    </div>
+                    <div class="project-body">
+                        <p class="project-description">Visual explanations of machine learning algorithms and decision boundaries.</p>
+                        <div class="project-tech">
+                            <span>D3.js</span>
+                            <span>Interactive</span>
+                            <span>Classification</span>
+                            <span>Clustering</span>
+                        </div>
+                    </div>
+                    <div class="project-footer">
+                        <a href="project-interactive.html" class="btn-secondary">View Details <i class="fas fa-arrow-right"></i></a>
+                        <div class="project-links">
+                            <a href="#" class="link-icon"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 9: Hypothesis Testing -->
+                <div class="project-card" data-category="statistics">
+                    <div class="project-header">
+                        <span class="project-category stats">Statistics</span>
+                        <h3 class="project-title">Advanced Hypothesis Testing Framework</h3>
+                    </div>
+                    <div class="project-body">
+                        <p class="project-description">Comprehensive framework for designing and analyzing complex hypothesis tests.</p>
+                        <div class="project-tech">
+                            <span>Power Analysis</span>
+                            <span>Multiple Testing</span>
+                            <span>Experimental Design</span>
+                            <span>Simulation</span>
+                        </div>
+                    </div>
+                    <div class="project-footer">
+                        <a href="project-hypothesis.html" class="btn-secondary">View Details <i class="fas fa-arrow-right"></i></a>
+                        <div class="project-links">
+                            <a href="#" class="link-icon"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2 class="section-title">About Me</h2>
+                    <p>I'm Nikolaos Papadopoulos, a data scientist specializing in statistical analysis and financial modeling. With a Master's in Statistics from Athens University of Economics and Business, I apply advanced quantitative methods to solve complex problems in finance and economics.</p>
+                    <p>My expertise spans Bayesian statistics, time series analysis, machine learning, and derivatives pricing. I'm particularly interested in the intersection of traditional finance and decentralized finance (DeFi).</p>
+                    <div class="about-details">
+                        <div class="detail">
+                            <strong>Education:</strong> M.Sc. in Statistics, AUEB
+                        </div>
+                        <div class="detail">
+                            <strong>Specialization:</strong> Financial Econometrics & Quantitative Finance
+                        </div>
+                        <div class="detail">
+                            <strong>Methodologies:</strong> Bayesian Inference, MCMC, Stochastic Modeling
+                        </div>
+                    </div>
+                </div>
+                <div class="about-visual">
+                    <div class="visual-card">
+                        <h3>Academic Focus</h3>
+                        <canvas id="aboutChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title">Get In Touch</h2>
+            <div class="contact-content">
                 <div class="contact-info">
                     <div class="contact-item">
-                        <i class="fab fa-github"></i>
-                        <h3>GitHub</h3>
-                        <p><a href="https://github.com/nick-o-laos" target="_blank">github.com/nick-o-laos</a></p>
-                    </div>
-                    
-                    <div class="contact-item">
-                        <i class="fab fa-linkedin"></i>
-                        <h3>LinkedIn</h3>
-                        <p><a href="https://linkedin.com/in/yourprofile" target="_blank">linkedin.com/in/yourprofile</a></p>
-                        <small><em>(Update this link)</em></small>
-                    </div>
-                    
-                    <div class="contact-item">
                         <i class="fas fa-envelope"></i>
-                        <h3>Email</h3>
-                        <p><a href="mailto:your.email@example.com">your.email@example.com</a></p>
-                        <small><em>(Update this email)</em></small>
+                        <div>
+                            <h4>Email</h4>
+                            <p>contact@nick-o-laos.github.io</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fab fa-github"></i>
+                        <div>
+                            <h4>GitHub</h4>
+                            <p>github.com/Nick-o-laos</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-graduation-cap"></i>
+                        <div>
+                            <h4>Education</h4>
+                            <p>Athens University of Economics and Business</p>
+                        </div>
                     </div>
                 </div>
-            </section>
-        </main>
-        
-        <footer>
-            <p>Portfolio created with GitHub Pages • Designed for clarity and professionalism</p>
-            <p class="update-date">Last updated: <span id="currentDate"></span></p>
-        </footer>
-    </div>
+                <div class="contact-form">
+                    <form id="contactForm">
+                        <input type="text" placeholder="Your Name" required>
+                        <input type="email" placeholder="Your Email" required>
+                        <textarea placeholder="Your Message" rows="4" required></textarea>
+                        <button type="submit" class="btn-primary">Send Message <i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <script>
-        // Set current date
-        const currentDate = new Date();
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('currentDate').textContent = currentDate.toLocaleDateString('en-US', options);
-        
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                if(targetId === '#') return;
-                
-                const targetElement = document.querySelector(targetId);
-                if(targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 20,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-        
-        // Add animation on scroll
-        const observerOptions = {
-            threshold: 0.1
-        };
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if(entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-        
-        // Observe project cards for animation
-        document.querySelectorAll('.project-card').forEach(card => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(card);
-        });
-    </script>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h3><span class="logo-accent">NP</span> Analytics</h3>
+                    <p>Quantitative Analysis Portfolio</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#home">Home</a>
+                    <a href="#projects">Projects</a>
+                    <a href="#skills">Skills</a>
+                    <a href="#about">About</a>
+                </div>
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fas fa-file-pdf"></i></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Nikolaos Papadopoulos. All rights reserved.</p>
+                <p>Data Analysis Portfolio - AUEB M.Sc. Statistics</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>
